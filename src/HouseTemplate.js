@@ -4,6 +4,7 @@ import './HouseTemplate.css'
 
 const ThreeBSP = require('tthreebsp')(THREE)
 
+
 class HouseTemplate extends Component {
     componentDidMount() {
         this.init()
@@ -19,47 +20,108 @@ class HouseTemplate extends Component {
         this.camera = camera
         this.renderer = renderer
         renderer.setSize(this.mount.clientWidth, this.mount.clientHeight );
+        renderer.shadowMap.enabled = true;
         this.mount.appendChild( renderer.domElement );
-        camera.position.z = 4.3;
-        camera.position.y = 0.5;
+        camera.position.z = 2;
+        camera.position.y = 0;
 
-        const light = new THREE.SpotLight(0xffffff);
-        light.position.set(0, 2.5, 4.2);
-        scene.add(light);
+        const light1 = new THREE.PointLight(0xffffff, 1.3);
+        light1.position.set(0, 4, 4);
+        scene.add(light1);
+
+        const shadowLight = new THREE.DirectionalLight(0xffffff, .9)
+        shadowLight.position.set(0, 350, -350);
+        shadowLight.castShadow = true;
+        shadowLight.shadow.camera.left = -400;
+        shadowLight.shadow.camera.right = 400;
+        shadowLight.shadow.camera.top = 400;
+        shadowLight.shadow.camera.bottom = -400;
+        shadowLight.shadow.camera.near = 1;
+        shadowLight.shadow.camera.far = 1000;
+        shadowLight.shadow.mapSize.width = 2048;
+        shadowLight.shadow.mapSize.height = 2048;
+        scene.add(shadowLight);
+
+        // const light2 = new THREE.PointLight(0xffffff, 1);
+        // light2.position.set(0, -5, -3);
+        // scene.add(light2);
+        // const light3 = new THREE.PointLight(0xffffff, 0.5);
+        // light3.position.set(0, 0, 10);
+        // scene.add(light2);
+
+        scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
       
-        this.createWalls()
+        this.createRoom()
         this.createIcon()
         this.animate()
     }
 
+
     createIcon = () => {
-        const geom1 = new THREE.BoxGeometry(0.5, 0.5, 0.5)
-        const loader = new THREE.TextureLoader()
-        const texture = loader.load('./crate.jpg') 
-        const material = new THREE.MeshBasicMaterial( { map: texture } )
-        const mesh = new THREE.Mesh( geom1, material )
-        this.scene.add(mesh)
+        // const geom1 = new THREE.BoxGeometry(0.5, 0.5, 0.5)
+        // const loader = new THREE.TextureLoader()
+        // const texture = loader.load('./crate.jpg') 
+        // const material = new THREE.MeshBasicMaterial( { map: texture } )
+        // const mesh = new THREE.Mesh( geom1, material )
+        // this.scene.add(mesh)
         // this.renderer.render()
     }
 
-    createWalls = () => {
-        const geometry1 = new THREE.BoxGeometry(2, 2, 2);
-        const geometry2 = new THREE.BoxGeometry(2, 2, 2);
-        const material = new THREE.MeshPhongMaterial( { color: new THREE.Color('#E8CACD') } );
+    createRoom = () => {
+
+        // floor
+        const geometry1 = new THREE.BoxGeometry(8, 4, 2);
+        const geometry2 = new THREE.BoxGeometry(8, 4, 2);
+        // const material = new THREE.MeshPhongMaterial( { color: new THREE.Color('#E8CACD') } );
+        const material = new THREE.MeshPhongMaterial( { color: new THREE.Color('#FDFFFD') } )
         const mesh1 = new THREE.Mesh( geometry1, material );
         const mesh2 = new THREE.Mesh( geometry2, material );
-        mesh1.position.set(0.05,0.05,0.05)
+        mesh1.position.set(0,0.1,0)
         const mesh1BSP = new ThreeBSP(mesh1)
         const mesh2BSP = new ThreeBSP(mesh2)
         const resultBSP = mesh1BSP.subtract(mesh2BSP)
         const result = resultBSP.toMesh()
+        const loader = new THREE.TextureLoader()
+        const texture = loader.load(require('./images/default_floor.jpeg')); 
+        const resMaterial = new THREE.MeshLambertMaterial( { map: texture } );
         result.geometry.computeFaceNormals()
         result.geometry.computeVertexNormals()
         result.material = material
         this.result = result
-        result.rotation.set(-Math.PI,-Math.PI/4,0)
-        result.position.set(0.01,0,0)
-        this.scene.add(result)
+        result.rotation.set(-Math.PI,0,0)
+        result.position.set(0.01,0,-2)
+        this.scene.add(result) 
+        
+        //walls
+        const geometry3 = new THREE.BoxGeometry(8, 4, 2);
+        const geometry4 = new THREE.BoxGeometry(7.80, 4, 2);
+        // const wallMaterial = new THREE.MeshLambertMaterial( { color: new THREE.Color('#E4B56A') } );
+        const wallMaterial = new THREE.MeshLambertMaterial( { color: new THREE.Color('#EFD0D6') } );
+        const mesh3 = new THREE.Mesh( geometry3, wallMaterial );
+        const mesh4 = new THREE.Mesh( geometry4, wallMaterial );
+        mesh3.position.set(0,0,0.08)
+        const mesh3BSP = new ThreeBSP(mesh3)
+        const mesh4BSP = new ThreeBSP(mesh4)
+        const wallResultBSP = mesh3BSP.subtract(mesh4BSP)
+        const wallResult = wallResultBSP.toMesh()
+        // const loader = new THREE.TextureLoader()
+        // const texture = loader.load(require('./images/default_floor.jpg')); 
+        // const resMaterial = new THREE.MeshPhongMaterial( { map: texture } );
+        wallResult.geometry.computeFaceNormals()
+        wallResult.geometry.computeVertexNormals()
+        wallResult.material = wallMaterial
+        this.wallResult = wallResult
+        wallResult.rotation.set(-Math.PI,0,0)
+        wallResult.position.set(0.01,0,-2)
+        this.scene.add(wallResult) 
+
+        // windows
+        const geometry5 = new THREE.BoxGeometry(4, 4, 2);
+        const wdMaterial = new THREE.MeshLambertMaterial( { color: new THREE.Color('#D6AF9C') } );
+        const mesh5 = new THREE.Mesh( geometry5, wdMaterial );
+        mesh5.position.set(0.01,0,-2)
+        this.scene.add(mesh5) 
+        
     }
 
     animate =() => {
