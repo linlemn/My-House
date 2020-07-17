@@ -1,15 +1,14 @@
 import * as THREE from 'three'
 import React, { Component } from 'react';
 import './HouseTemplate.css'
+
 import sofa from './icons/sofa.png'
 import table from './icons/table.png'
 import chair from './icons/chair.png'
 import lamp from './icons/lamp.png'
 import bookshelf from './icons/bookshelf.png'
 import ReactModal from 'react-modal';
-
-
-
+import {OBJLoader, MTLLoader} from 'three-obj-mtl-loader';
 const ThreeBSP = require('tthreebsp')(THREE)
 
 
@@ -34,10 +33,10 @@ class HouseTemplate extends Component {
         camera.position.y = 0;
 
         const light1 = new THREE.PointLight(0xffffff, 1.3);
-        light1.position.set(0, 4, 4);
+        light1.position.set(0, 7, 4);
         scene.add(light1);
 
-        const shadowLight = new THREE.DirectionalLight(0xffffff, .9)
+        const shadowLight = new THREE.DirectionalLight(0xffffff, 1)
         shadowLight.position.set(0, 350, -350);
         shadowLight.castShadow = true;
         shadowLight.shadow.camera.left = -400;
@@ -50,9 +49,9 @@ class HouseTemplate extends Component {
         shadowLight.shadow.mapSize.height = 2048;
         scene.add(shadowLight);
 
-        // const light2 = new THREE.PointLight(0xffffff, 1);
-        // light2.position.set(0, -5, -3);
-        // scene.add(light2);
+        const light2 = new THREE.DirectionalLight(0xffffff, 0.1);
+        light2.position.set(10, 4, 4);
+        scene.add(light2);
         // const light3 = new THREE.PointLight(0xffffff, 0.5);
         // light3.position.set(0, 0, 10);
         // scene.add(light2);
@@ -94,7 +93,7 @@ class HouseTemplate extends Component {
         const geometry1 = new THREE.BoxGeometry(8, 4, 2);
         const geometry2 = new THREE.BoxGeometry(8, 4, 2);
         // const material = new THREE.MeshPhongMaterial( { color: new THREE.Color('#E8CACD') } );
-        const material = new THREE.MeshPhongMaterial( { color: new THREE.Color('#FDFFFD') } )
+        const material = new THREE.MeshLambertMaterial( { color: new THREE.Color('#ffffff') } )
         const mesh1 = new THREE.Mesh( geometry1, material );
         const mesh2 = new THREE.Mesh( geometry2, material );
         mesh1.position.set(0,0.1,0)
@@ -102,9 +101,9 @@ class HouseTemplate extends Component {
         const mesh2BSP = new ThreeBSP(mesh2)
         const resultBSP = mesh1BSP.subtract(mesh2BSP)
         const result = resultBSP.toMesh()
-        const loader = new THREE.TextureLoader()
-        const texture = loader.load(require('./images/default_floor.jpeg')); 
-        const resMaterial = new THREE.MeshLambertMaterial( { map: texture } );
+        // const loader = new THREE.TextureLoader()
+        // const texture = loader.load(require('./images/default_floor.jpeg')); 
+        // const resMaterial = new THREE.MeshLambertMaterial( { map: texture } );
         result.geometry.computeFaceNormals()
         result.geometry.computeVertexNormals()
         result.material = material
@@ -120,14 +119,17 @@ class HouseTemplate extends Component {
         const wallMaterial = new THREE.MeshLambertMaterial( { color: new THREE.Color('#EFD0D6') } );
         const mesh3 = new THREE.Mesh( geometry3, wallMaterial );
         const mesh4 = new THREE.Mesh( geometry4, wallMaterial );
-        mesh3.position.set(0,0,0.08)
-        const mesh3BSP = new ThreeBSP(mesh3)
-        const mesh4BSP = new ThreeBSP(mesh4)
-        const wallResultBSP = mesh3BSP.subtract(mesh4BSP)
+        mesh3.position.set(0,0,0.1);
+        const mesh3BSP = new ThreeBSP(mesh3);
+        const mesh4BSP = new ThreeBSP(mesh4);
+        var wallResultBSP = mesh3BSP.subtract(mesh4BSP);
+        const geometry5 = new THREE.BoxGeometry(2.1, 3.9, 2.2);
+        const wdMaterial = new THREE.MeshPhongMaterial( { color: new THREE.Color('#D6AF9C'), shininess:5} );
+        const mesh5 = new THREE.Mesh( geometry5, wdMaterial );
+        mesh5.position.set(-2, 0.1, 0)
+        const mesh5BSP = new ThreeBSP(mesh5);
+        wallResultBSP = wallResultBSP.subtract(mesh5BSP);
         const wallResult = wallResultBSP.toMesh()
-        // const loader = new THREE.TextureLoader()
-        // const texture = loader.load(require('./images/default_floor.jpg')); 
-        // const resMaterial = new THREE.MeshPhongMaterial( { map: texture } );
         wallResult.geometry.computeFaceNormals()
         wallResult.geometry.computeVertexNormals()
         wallResult.material = wallMaterial
@@ -137,11 +139,42 @@ class HouseTemplate extends Component {
         this.scene.add(wallResult) 
 
         // windows
-        // const geometry5 = new THREE.BoxGeometry(4, 4, 2);
-        // const wdMaterial = new THREE.MeshLambertMaterial( { color: new THREE.Color('#D6AF9C') } );
-        // const mesh5 = new THREE.Mesh( geometry5, wdMaterial );
-        // mesh5.position.set(0.01,0,-2)
-        // this.scene.add(mesh5) 
+
+        let mtlLoader = new MTLLoader();
+        mtlLoader.setPath(process.env.PUBLIC_URL);
+        mtlLoader.load('file.mtl', materials => {
+            const objLoader = new OBJLoader();
+            // objLoader.setMaterials(materials);
+            objLoader.load(process.env.PUBLIC_URL + '/file.obj', (root) => {
+                root.material = wdMaterial
+                root.scale.x =  root.scale.y =  root.scale.z = 0.0007
+                root.position.set(-1.99, 0, -2.98);
+                root.updateMatrix();
+                this.scene.add(root);
+            });
+        });
+    
+
+        // const geometry6 = new THREE.BoxGeometry(2.1, 4, 0.06);
+        // const mesh6 = new THREE.Mesh( geometry6, wdMaterial );
+        // // mesh6.position.set(-1.99, 0, -2.98);
+        // const geometry7 = new THREE.BoxGeometry(0.9, 3.6, 1);
+        // const mesh7 = new THREE.Mesh( geometry7, wdMaterial );
+        // mesh7.position.set(0.5, 0, 0.03);
+        // const mesh8 = new THREE.Mesh( geometry7, wdMaterial );
+        // mesh8.position.set(-0.5, 0, 0.03);
+        // const mesh6BSP = new ThreeBSP(mesh6);
+        // const mesh7BSP = new ThreeBSP(mesh7);
+        // const mesh8BSP = new ThreeBSP(mesh8);
+        // var wdResultBSP = mesh6BSP.subtract(mesh7BSP);
+        // wdResultBSP = wdResultBSP.subtract(mesh8BSP);
+        // const wdResult = wdResultBSP.toMesh();
+        // wdResult.geometry.computeFaceNormals()
+        // wdResult.geometry.computeVertexNormals()
+        // wdResult.material = wdMaterial;
+        // this.wdResult = wdResult
+        // wdResult.position.set(-1.99, 0, -2.98);
+        // this.scene.add(wdResult);
         
     }
 
