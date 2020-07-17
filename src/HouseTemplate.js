@@ -1,6 +1,14 @@
 import * as THREE from 'three'
 import React, { Component } from 'react';
 import './HouseTemplate.css'
+import sofa from './icons/sofa.png'
+import table from './icons/table.png'
+import chair from './icons/chair.png'
+import lamp from './icons/lamp.png'
+import bookshelf from './icons/bookshelf.png'
+import ReactModal from 'react-modal';
+
+
 
 const ThreeBSP = require('tthreebsp')(THREE)
 
@@ -56,15 +64,28 @@ class HouseTemplate extends Component {
         this.animate()
     }
 
+    createRoundRect = (x, y, width, height, radius) => {
+        const shape = new THREE.Shape()
+        shape.moveTo( x, y + radius );
+        shape.lineTo( x, y + height - radius );
+        shape.quadraticCurveTo( x, y + height, x + radius, y + height );
+        shape.lineTo( x + width - radius, y + height) ;
+        shape.quadraticCurveTo( x + width, y + height, x + width, y + height - radius );
+        shape.lineTo( x + width, y + radius );
+        shape.quadraticCurveTo( x + width, y, x + width - radius, y );
+        shape.lineTo( x + radius, y );
+        shape.quadraticCurveTo( x, y, x, y + radius );
+        return shape
+    }
 
     createIcon = () => {
-        // const geom1 = new THREE.BoxGeometry(0.5, 0.5, 0.5)
-        // const loader = new THREE.TextureLoader()
-        // const texture = loader.load('./crate.jpg') 
-        // const material = new THREE.MeshBasicMaterial( { map: texture } )
-        // const mesh = new THREE.Mesh( geom1, material )
+        const geom1 = new THREE.CircleGeometry(0.3, 360)
+        const loader = new THREE.TextureLoader()
+        const texture = loader.load(require('./icons/sofa.png')) 
+        const material = new THREE.MeshBasicMaterial( { map: texture } )
+        material.transparent = true
+        const mesh = new THREE.Mesh( geom1, material )
         // this.scene.add(mesh)
-        // this.renderer.render()
     }
 
     createRoom = () => {
@@ -116,11 +137,11 @@ class HouseTemplate extends Component {
         this.scene.add(wallResult) 
 
         // windows
-        const geometry5 = new THREE.BoxGeometry(4, 4, 2);
-        const wdMaterial = new THREE.MeshLambertMaterial( { color: new THREE.Color('#D6AF9C') } );
-        const mesh5 = new THREE.Mesh( geometry5, wdMaterial );
-        mesh5.position.set(0.01,0,-2)
-        this.scene.add(mesh5) 
+        // const geometry5 = new THREE.BoxGeometry(4, 4, 2);
+        // const wdMaterial = new THREE.MeshLambertMaterial( { color: new THREE.Color('#D6AF9C') } );
+        // const mesh5 = new THREE.Mesh( geometry5, wdMaterial );
+        // mesh5.position.set(0.01,0,-2)
+        // this.scene.add(mesh5) 
         
     }
 
@@ -141,7 +162,13 @@ class HouseTemplate extends Component {
               <div
                   className= "canvas"
                   ref={(mount) => { this.mount = mount }}
-              />
+              >
+                  <img className="icon sofa" src={sofa} />
+                  <img className="icon table" src={table} />
+                  <img className="icon chair" src={chair} />
+                  <img className="icon lamp" src={lamp} />
+                  <img className="icon bookshelf" src={bookshelf} />
+                </div>
           );
     }
 }
