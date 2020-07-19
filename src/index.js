@@ -5,6 +5,7 @@ import App from './App';
 import HouseTemplate from './HouseTemplate'
 import * as serviceWorker from './serviceWorker';
 
+
 ReactDOM.render(
   <React.StrictMode>
     <HouseTemplate />

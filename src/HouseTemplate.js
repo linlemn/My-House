@@ -7,14 +7,35 @@ import table from './icons/table.png'
 import chair from './icons/chair.png'
 import lamp from './icons/lamp.png'
 import bookshelf from './icons/bookshelf.png'
-import camera from './icons/camera.png'
+import camera from './icons/camera.svg'
 import album from './icons/album.svg'
 import gallery from './icons/gallery.svg'
 
 import Modal from 'react-modal';
 import {OBJLoader, MTLLoader} from 'three-obj-mtl-loader';
+
+import axios from 'axios';
+import qs from 'qs';
+
 const ThreeBSP = require('tthreebsp')(THREE)
 
+const _SUPER_CATEGORIES_3D =
+{
+  'shelf': 1,
+  'sofa': 5,
+  'chair': 3,
+  'lighting': 7,
+  'table': 4
+}
+//  [
+//   {'id': 1, 'category': 'Cabinet/Shelf/Desk'},
+//   {'id': 2, 'category': 'Bed'},
+//   {'id': 3, 'category': 'Chair'},
+//   {'id': 4, 'category': 'Table'},
+//   {'id': 5, 'category': 'Sofa'},
+//   {'id': 6, 'category': 'Pier/Stool'},
+//   {'id': 7, 'category': 'Lighting'},
+// ]
 
 class HouseTemplate extends Component {
     constructor(props) {
@@ -23,12 +44,12 @@ class HouseTemplate extends Component {
             modalIsOpen: false,
             currentItem: -1,
             loading: false,
-            items: []
+            clickType: -1,
+            items: ['gallery', 'camera', 'album'],
         }
     }
     componentDidMount() {
         this.init()
-        // document.getElementsByClassName('select-video')[0].setAttribute('capture', 'user')
     }
 
     init = () => {
@@ -75,6 +96,8 @@ class HouseTemplate extends Component {
         // const loader = new THREE.TextureLoader();
         // const bgTexture = loader.load(process.env.PUBLIC_URL + '/images/bg3.jpg'); 
         // scene.background = bgTexture;
+
+        // this.loadObj(`${process.env.PUBLIC_URL}/0000033.obj`, `${process.env.PUBLIC_URL }/0000033.png`)
       
         this.createRoom()
         this.createIcon()
@@ -199,8 +222,11 @@ class HouseTemplate extends Component {
 
     animate =() => {
         requestAnimationFrame( this.animate );
-        // this.icon.rotation.x += 0.01;
-        // this.icon.rotation.y += 0.01;
+        if (this.obj) {
+          this.obj.rotation.x += 0.01;
+          // this.obj.rotation.y += 0.01;
+        }
+        
         // this.line.rotation.x += 0.02
         this.renderer.render( this.scene, this.camera );
       }
@@ -209,13 +235,12 @@ class HouseTemplate extends Component {
           this.mount.removeChild(this.renderer.domElement)
     }
 
-    toggleModal = event => {
+    toggleModal = (id, event) => {
         event.preventDefault();
-        console.log("NESTEDMODAL", event);
         this.setState({
-          items: [],
           modalIsOpen: !this.state.modalIsOpen,
-          loading: true
+          loading: true,
+          clickType: id
         });
       }
     
@@ -225,31 +250,60 @@ class HouseTemplate extends Component {
         setTimeout(() => resolve(true), 500);
     })).then(res => {
         this.setState({
-        items: [1, 2, 3, 4, 5].map(x => `Item ${x}`),
         loading: false
         });
     });
     }
 
+    loadObj = (objUrl, mtlUrl) => {
+
+      const loader = new OBJLoader()
+
+      loader.load(objUrl, geometry => {
+        var material = new THREE.MeshLambertMaterial({color: 0x5C3A21});
+
+      geometry.traverse( function (child) {
+          if ( child instanceof THREE.Mesh ) {
+              child.material.map = THREE.ImageUtils.loadTexture(mtlUrl);
+              child.material.needsUpdate = true;
+          }
+      });
+
+           // geometry is a group of children. If a child has one additional child it's probably a mesh
+           geometry.children.forEach(function (child) {
+               if (child.children.length == 1) {
+                   if (child.children[0] instanceof THREE.Mesh) {
+                       child.children[0].material = material;
+                   }
+               }
+           });
+
+           geometry.scale.set(1, 1, 1);
+           geometry.rotation.x = -2;
+           this.obj = geometry
+           this.scene.add(geometry);
+       });
+    }
+
     render() {
-        const { modalIsOpen } = this.state
+        const { modalIsOpen, items, loading, clickType } = this.state
           return (
               <div
                   className= "canvas"
                   ref={(mount) => { this.mount = mount }}
               >
-                  <img className="icon sofa" id="sofa" src={sofa} onClick={this.toggleModal} />
-                  <img className="icon table" id="table" src={table} onClick={this.toggleModal} />
-                  <img className="icon chair" id="chair" src={chair} onClick={this.toggleModal} />
-                  <img className="icon lamp" id="lamp" src={lamp} onClick={this.toggleModal} />
-                  <img className="icon bookshelf" id="bookshelf" src={bookshelf} onClick={this.toggleModal} />
+                  <img className="icon sofa" id="sofa" src={sofa} onClick={e => {this.toggleModal('sofa', e)}} />
+                  <img className="icon table" id="table" src={table} onClick={e => {this.toggleModal('table', e)}} />
+                  <img className="icon chair" id="chair" src={chair} onClick={e => {this.toggleModal('chair', e)}} />
+                  <img className="icon lamp" id="lamp" src={lamp} onClick={e => {this.toggleModal('lamp', e)}} />
+                  <img className="icon bookshelf" id="bookshelf" src={bookshelf} onClick={e => {this.toggleModal('bookshelf', e)}} />
                   <Modal
                     closeTimeoutMS={150}
                     contentLabel="modalA"
                     isOpen={modalIsOpen}
                     onAfterOpen={this.handleOnAfterOpenModal}
-                    onRequestClose={this.toggleModal}
-                    ariaHideApp={true}
+                    onRequestClose={e => {this.toggleModal(clickType, e)}}
+                    ariaHideApp={false}
                     style={{
                         content: {
                             position: 'absolute',
@@ -264,14 +318,14 @@ class HouseTemplate extends Component {
                           }
                     }}
                     >
-                    {
-                    <div className="selection-wrapper">
-                        <img className="selection" src={camera} />
-                        <input type="file" accept="image/*" capture="camera" />  
-                        <img className="selection" src={album} />
-                        <img className="selection" src={gallery} />
-                    </div>
-                    }
+                      <div className="selection-wrapper">
+                        {loading ? (
+                          <p>Loading...</p>
+                          ) : (
+                          <List items={items} type={clickType} />
+                          )
+                        }
+                      </div>
                     </Modal>
                 </div>
           );
@@ -282,40 +336,107 @@ class Item extends Component {
     constructor(props) {
       super(props);
       this.state = {
-        isOpen: false
+        isOpen: false,
+        loading: false,
       };
     }
   
     toggleModal = index => event => {
-      console.log("NESTED MODAL ITEM", event);
       this.setState({
-        itemNumber: !this.state.isOpen ? index : null,
-        isOpen: !this.state.isOpen
+        isOpen: !this.state.isOpen,
+        loading: true,
       });
+      console.log("NESTED MODAL ITEM", index, this.state.isOpen);
     };
+
+    displaySelection = selection => {
+      const toggleModal = this.toggleModal(this.props.index);
+      switch (selection) {
+        case 'camera':
+          return <div className="selection" key={selection}>
+          <img src={camera} /> 
+          <input type="file" accept="image/*" capture="camera" />  
+        </div>
+        case 'gallery':
+          return <div className="selection" key={selection} onClick={toggleModal}>
+          <img src={gallery} /> 
+        </div>
+        case 'album':
+          return  <div className="selection" key={selection}>
+            <img src={album} /> 
+            <input type="file" accept="image/*" />  
+          </div>
+        default:
+          return
+      }
+    }
+
+    handleOnAfterOpenModal = () => {
+      const {selection} = this.props
+
+      axios.post('http://103.79.27.148:8001/photos/gallery', qs.stringify({
+        category: _SUPER_CATEGORIES_3D[selection]
+      }))
+      .then(function (response) {
+        console.log(response);
+        this.setState({
+          loading: false
+        })
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+      // // when ready, we can access the available refs.
+      // (new Promise((resolve, reject) => {
+      //     setTimeout(() => resolve(true), 500);
+      // })).then(res => {
+      //     this.setState({
+      //     // items: [1, 2, 3, 4, 5].map(x => `Item ${x}`),
+      //     // items: ['gallery', 'camera', 'album'],
+      //     loading: false
+      //     });
+      // });
+      }
+
+    displayModalContent = selection => {
+      switch (selection) {
+        case 'camera':
+          return <img src={camera} /> 
+        case 'gallery':
+          return  <div className="gallery-wrapper">
+            
+          </div>
+         
+        case 'album':
+          return <img src={album} /> 
+        default:
+          return
+      }
+    }
   
     render() {
-      const { isOpen, itemNumber } = this.state;
-      const { number, index } = this.props;
-  
+      const { isOpen } = this.state;
+      const { selection, index } = this.props;
       const toggleModal = this.toggleModal(index);
-  
+    
       return (
-        <div key={index} onClick={toggleModal}>
-          <a href="javascript:void(0)">{number}</a>
-          <Modal closeTimeoutMS={150}
-                 contentLabel="modalB"
-                 isOpen={isOpen}
-                 onRequestClose={toggleModal}
-                 ariaHideApp={true}
-                 aria={{
-                   labelledby: "item_title",
-                   describedby: "item_info"
-                 }}>
-            <h1 id="item_title">Item: {itemNumber + 1}</h1>
+        <div className="selection-wrapper">
+          {
+            this.displaySelection(selection)
+          }
+          <Modal 
+          closeTimeoutMS={150}
+          contentLabel="modalB"
+          isOpen={isOpen}
+          onRequestClose={toggleModal}
+          ariaHideApp={false}
+          onAfterOpen={this.handleOnAfterOpenModal}
+          >
+            {/* <h1 id="item_title">Item: {index + 1}</h1>
             <div id="item_info">
               <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur pulvinar varius auctor. Aliquam maximus et justo ut faucibus. Nullam sit amet urna molestie turpis bibendum accumsan a id sem. Proin ullamcorper nisl sapien, gravida dictum nibh congue vel. Vivamus convallis dolor vitae ipsum ultricies, vitae pulvinar justo tincidunt. Maecenas a nunc elit. Phasellus fermentum, tellus ut consectetur scelerisque, eros nunc lacinia eros, aliquet efficitur tellus arcu a nibh. Praesent quis consequat nulla. Etiam dapibus ac sem vel efficitur. Nunc faucibus efficitur leo vitae vulputate. Nunc at quam vitae felis pretium vehicula vel eu quam. Quisque sapien mauris, condimentum eget dictum ut, congue id dolor. Donec vitae varius orci, eu faucibus turpis. Morbi eleifend orci non urna bibendum, ac scelerisque augue efficitur.</p>
-            </div>
+            </div> */}
           </Modal>
         </div>
       );
@@ -324,68 +445,10 @@ class Item extends Component {
   
   class List extends Component {
     render() {
-      return this.props.items.map((n, index) => (
-        <Item key={index} index={index} number={n} />
+      return this.props.items.map((selection, index) => (
+        <Item key={index} index={index} selection={selection} type={this.props.type} />
       ));
     }
   }
-  
-  
-//   class NestedModals extends Component {
-//     constructor(props) {
-//       super(props);
-  
-//       this.state = {
-//         isOpen: false,
-//         currentItem: -1,
-//         loading: false,
-//         items: []
-//       };
-//     }
-  
-//     toggleModal = event => {
-//       event.preventDefault();
-//       console.log("NESTEDMODAL", event);
-//       this.setState({
-//         items: [],
-//         isOpen: !this.state.isOpen,
-//         loading: true
-//       });
-//     }
-  
-//     handleOnAfterOpenModal = () => {
-//       // when ready, we can access the available refs.
-//       (new Promise((resolve, reject) => {
-//         setTimeout(() => resolve(true), 500);
-//       })).then(res => {
-//         this.setState({
-//           items: [1, 2, 3, 4, 5].map(x => `Item ${x}`),
-//           loading: false
-//         });
-//       });
-//     }
-  
-//     render() {
-//       const { isOpen } = this.state;
-//       return (
-//         <div>
-//           <Modal
-//             id="test"
-//             closeTimeoutMS={150}
-//             contentLabel="modalA"
-//             isOpen={isOpen}
-//             onAfterOpen={this.handleOnAfterOpenModal}
-//             onRequestClose={this.toggleModal}>
-//             <h1>List of items</h1>
-//             {this.state.loading ? (
-//               <p>Loading...</p>
-//             ) : (
-//               <List items={this.state.items} />
-//             )}
-//           </Modal>
-//         </div>
-//       );
-//     }
-//   }
 
 export default HouseTemplate;
