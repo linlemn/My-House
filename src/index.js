@@ -2,13 +2,26 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
-import HouseTemplate from './HouseTemplate'
+import { Link, BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import HouseTemplate from './pages/WelcomePage/HouseTemplate'
+import WelcomePage from './pages/WelcomePage/WelcomePage'
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <React.StrictMode>
-    <HouseTemplate />
-  </React.StrictMode>,
+  <div>
+    {/* <WelcomePage /> */}
+    <Router><Switch>
+              <Route exact path="/">
+                <WelcomePage />
+              </Route>
+              <Route exact path="/HouseTemplate">
+                <HouseTemplate />
+              </Route>
+            </Switch></Router>
+  </div>
+ </React.StrictMode>
+  ,
   document.getElementById('root')
 );
 
