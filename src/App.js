@@ -1,6 +1,9 @@
 import React from 'react';
 import logo from './logo.svg';
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import './App.css';
+
+import HouseTemplate from "./pages/WelcomePage/HouseTemplate"
 
 function App() {
   return (
@@ -19,6 +22,9 @@ function App() {
           Learn React
         </a>
       </header>
+      <Router>
+        <Route path="/HouseTemplate" component={HouseTemplate}  />
+      </Router>
     </div>
   );
 }
