@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="332px" height="108px" viewBox="0 0 332 108" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50 (54983) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 8</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <filter x="-10.9%" y="-12.5%" width="130.4%" height="135.0%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="3" dy="3" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="iPad" transform="translate(-510.000000, -333.000000)">
+            <g id="Group-8" transform="translate(510.000000, 333.000000)">
+                <rect id="Rectangle" fill="#A1A4A8" x="0" y="0" width="332" height="108" rx="54"></rect>
+                <g id="camera" filter="url(#filter-1)" transform="translate(25.000000, 24.000000)" fill-rule="nonzero">
+                    <path d="M55.2990935,7.19025815 C53.305016,7.01276553 51.508774,5.92831507 50.4410521,4.25729847 C48.7448713,1.60748643 45.7902915,0.000485817344 42.6137197,0 L26.3862803,0 C23.2097085,0.000485817344 20.2551287,1.60748643 18.5589479,4.25729847 C17.4904489,5.92699271 15.6943339,7.01008471 13.7009065,7.18679127 C5.92804028,7.88016233 0,14.0338307 0,21.3714302 L0,44.8940442 C0,52.2316437 5.92804037,58.385312 13.7009065,59.0769497 C27.5353433,60.3076834 41.4628998,60.3076834 55.2990935,59.0769497 C63.0719597,58.3835787 69,52.2299103 69,44.8957777 L69,21.3731636 C69,14.0355641 63.0719596,7.88189581 55.2990935,7.19025815" id="Shape" fill="#B3B7BC"></path>
+                    <path d="M51,32.9991372 C51,41.8361697 43.6126984,49 34.5,49 C25.3873016,49 18,41.8361697 18,32.9991372 C18.0009826,24.1627786 25.3879965,16.9999999 34.5,17 C43.6120035,16.9999999 50.9990174,24.1627786 51,32.9991372" id="Shape" fill="#888B8E"></path>
+                    <path d="M30.8448626,39.0043136 L40.3712439,31.2117713 C42.5134384,29.4587165 42.5577719,26.1467969 40.4138041,24.3973052 C38.4183777,22.7660855 35.902101,21.9166874 33.331085,22.006452 C27.9720522,22.1810449 23.4766359,26.4639145 23.038621,31.8299724 C22.8682129,33.8364446 23.2640133,35.850553 24.1806517,37.6414204 C25.4503631,40.1177884 28.6938014,40.7644946 30.8448626,39.0043136" id="Shape" fill="#B3B7BC"></path>
+                </g>
+                <text id="Camera" font-family="PingFangSC-Semibold, PingFang SC" font-size="48" font-weight="500" fill="#FFFFFF">
+                    <tspan x="111" y="67">Camera</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>
