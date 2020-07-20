@@ -40,5 +40,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://iot-demo-web-dev.autel.com"
+  "proxy": "http://103.79.27.148:8001"
 }

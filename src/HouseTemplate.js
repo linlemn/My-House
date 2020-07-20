@@ -371,13 +371,26 @@ class Item extends Component {
       }
     }
 
-    handleOnAfterOpenModal = () => {
-      const {selection} = this.props
+    transformRequest =  (data) => {
+      let ret = ''
+      for (let it in data) {
+        ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+      }
+      return ret
+  }
 
-      axios.post('http://103.79.27.148:8001/photos/gallery', qs.stringify({
-        category: _SUPER_CATEGORIES_3D[selection]
-      }))
-      .then(function (response) {
+    handleOnAfterOpenModal = () => {
+      const {type} = this.props
+      fetch('/photos/gallery', {
+        method: 'post',
+        body: this.transformRequest({
+          category: _SUPER_CATEGORIES_3D[type]
+        }),
+        mode: 'cors',
+        headers:{
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }, 
+      }).then(function (response) {
         console.log(response);
         this.setState({
           loading: false
@@ -386,6 +399,18 @@ class Item extends Component {
       .catch(function (error) {
         console.log(error);
       });
+      // axios.post('/photos/gallery', qs.stringify({
+      //   category: _SUPER_CATEGORIES_3D[selection]
+      // }))
+      // .then(function (response) {
+      //   console.log(response);
+      //   this.setState({
+      //     loading: false
+      //   })
+      // })
+      // .catch(function (error) {
+      //   console.log(error);
+      // });
 
       // // when ready, we can access the available refs.
       // (new Promise((resolve, reject) => {
