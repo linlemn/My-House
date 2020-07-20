@@ -2,20 +2,17 @@ import * as THREE from 'three'
 import React, { Component } from 'react';
 import './HouseTemplate.css'
 
-import sofa from './icons/sofa.png'
-import table from './icons/table.png'
-import chair from './icons/chair.png'
-import lamp from './icons/lamp.png'
-import bookshelf from './icons/bookshelf.png'
-import camera from './icons/camera.svg'
-import album from './icons/album.svg'
-import gallery from './icons/gallery.svg'
+import sofa from './pages/WelcomePage/icons/sofa.png'
+import table from './pages/WelcomePage/icons/table.png'
+import chair from './pages/WelcomePage/icons/chair.png'
+import lamp from './pages/WelcomePage/icons/lamp.png'
+import bookshelf from './pages/WelcomePage/icons/bookshelf.png'
+import camera from './pages/WelcomePage/icons/camera.svg'
+import album from './pages/WelcomePage/icons/album.svg'
+import gallery from './pages/WelcomePage/icons/gallery.svg'
 
 import Modal from 'react-modal';
 import {OBJLoader, MTLLoader} from 'three-obj-mtl-loader';
-
-import axios from 'axios';
-import qs from 'qs';
 
 const ThreeBSP = require('tthreebsp')(THREE)
 
@@ -121,7 +118,7 @@ class HouseTemplate extends Component {
     createIcon = () => {
         const geom1 = new THREE.CircleGeometry(0.3, 360)
         const loader = new THREE.TextureLoader()
-        const texture = loader.load(require('./icons/sofa.png')) 
+        const texture = loader.load(require('./pages/WelcomePage/icons/sofa.png')) 
         const material = new THREE.MeshBasicMaterial( { map: texture } )
         material.transparent = true
         const mesh = new THREE.Mesh( geom1, material )
