@@ -5,22 +5,36 @@ import App from './App';
 import { Link, BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import HouseTemplate from './pages/WelcomePage/HouseTemplate'
 import WelcomePage from './pages/WelcomePage/WelcomePage'
+import SelectRoom from './pages/WelcomePage/SelectRoom'
 import * as serviceWorker from './serviceWorker';
 
+
+import { TransitionGroup, CSSTransition } from 'react-transition-group'
+
 ReactDOM.render(
-  <React.StrictMode>
+  // <React.StrictMode>
   <div>
-    {/* <WelcomePage /> */}
-    <Router><Switch>
-              <Route exact path="/">
-                <WelcomePage />
-              </Route>
-              <Route exact path="/HouseTemplate">
-                <HouseTemplate />
-              </Route>
-            </Switch></Router>
+    <Router>
+      <TransitionGroup>
+        <CSSTransition
+          appear={true}
+          classNames="appAppear"
+          timeout={500}
+        >
+          <Switch>
+            <Route exact path="/">
+              <WelcomePage />
+            </Route>
+            <Route exact path="/HouseTemplate">
+              <HouseTemplate />
+            </Route>
+            <Route exact path="/SelectRoom">
+              <SelectRoom />
+            </Route>
+          </Switch></CSSTransition>
+      </TransitionGroup></Router>
   </div>
- </React.StrictMode>
+  //  </React.StrictMode>
   ,
   document.getElementById('root')
 );

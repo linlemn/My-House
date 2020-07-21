@@ -21,7 +21,7 @@ class WelcomePage extends Component {
     }
   
     clickStart = () => {
-      this.props.history.push('./HouseTemplate')
+      this.props.history.push('./SelectRoom')
     }
   
     render() {
