@@ -26,6 +26,15 @@ const _SUPER_CATEGORIES_3D =
   'lamp': 7,
   'table': 4
 }
+
+const _SUPER_CATEGORIES_3D_REV =
+{
+  1: 'shelf',
+  5: 'sofa',
+  3: 'chair',
+  7: 'lighting',
+  4: 'table'
+}
 //  [
 //   {'id': 1, 'category': 'Cabinet/Shelf/Desk'},
 //   {'id': 2, 'category': 'Bed'},
@@ -45,6 +54,7 @@ class HouseTemplate extends Component {
             loading: false,
             clickType: -1,
             items: ['gallery', 'camera', 'album'],
+            objs: {}
         }
     }
     componentDidMount() {
@@ -70,22 +80,22 @@ class HouseTemplate extends Component {
         light1.position.set(0, 7, 4);
         scene.add(light1);
 
-        const shadowLight = new THREE.DirectionalLight(0xffffff, 1)
-        shadowLight.position.set(0, 350, -350);
-        shadowLight.castShadow = true;
-        shadowLight.shadow.camera.left = -400;
-        shadowLight.shadow.camera.right = 400;
-        shadowLight.shadow.camera.top = 400;
-        shadowLight.shadow.camera.bottom = -400;
-        shadowLight.shadow.camera.near = 1;
-        shadowLight.shadow.camera.far = 1000;
-        shadowLight.shadow.mapSize.width = 2048;
-        shadowLight.shadow.mapSize.height = 2048;
-        scene.add(shadowLight);
+        // const shadowLight = new THREE.DirectionalLight(0xffffff, 1)
+        // shadowLight.position.set(0, -100, 350);
+        // shadowLight.castShadow = true;
+        // shadowLight.shadow.camera.left = -400;
+        // shadowLight.shadow.camera.right = 400;
+        // shadowLight.shadow.camera.top = 400;
+        // shadowLight.shadow.camera.bottom = -400;
+        // shadowLight.shadow.camera.near = 1;
+        // shadowLight.shadow.camera.far = 1000;
+        // shadowLight.shadow.mapSize.width = 2048;
+        // shadowLight.shadow.mapSize.height = 2048;
+        // scene.add(shadowLight);
 
-        const light2 = new THREE.DirectionalLight(0xffffff, 0.1);
-        light2.position.set(10, 4, 4);
-        scene.add(light2);
+        // const light2 = new THREE.SpotLight(0xffffff, 0.3);
+        // light2.position.set(0, 1.2, -1);
+        // scene.add(light2);
         // const light3 = new THREE.PointLight(0xffffff, 0.5);
         // light3.position.set(0, 0, 10);
         // scene.add(light2);
@@ -96,7 +106,10 @@ class HouseTemplate extends Component {
         // const bgTexture = loader.load(process.env.PUBLIC_URL + '/images/bg3.jpg'); 
         // scene.background = bgTexture;
 
-        // this.loadObj(`${process.env.PUBLIC_URL}/0000033.obj`, `${process.env.PUBLIC_URL }/0000033.png`)
+        this.loadObj(`${process.env.PUBLIC_URL}/000041.obj`, `${process.env.PUBLIC_URL }/000041.png`, 5)
+        this.loadObj(`${process.env.PUBLIC_URL}/000022.obj`, `${process.env.PUBLIC_URL }/000022.png`, 3)
+        this.loadObj(`${process.env.PUBLIC_URL}/0000033.obj`, `${process.env.PUBLIC_URL }/0000033.png`, 4)
+        this.loadObj(`${process.env.PUBLIC_URL}/0003753.obj`, `${process.env.PUBLIC_URL }/0003753.png`, 1)
       
         this.createRoom()
         this.createIcon()
@@ -132,8 +145,7 @@ class HouseTemplate extends Component {
         // floor
         const geometry1 = new THREE.BoxGeometry(8, 4, 2);
         const geometry2 = new THREE.BoxGeometry(8, 4, 2);
-        // const material = new THREE.MeshPhongMaterial( { color: new THREE.Color('#E8CACD') } );
-        const material = new THREE.MeshLambertMaterial( { color: new THREE.Color('#ffffff') } )
+        const material = new THREE.MeshPhongMaterial( { color: new THREE.Color('#ffffff') } );
         const mesh1 = new THREE.Mesh( geometry1, material );
         const mesh2 = new THREE.Mesh( geometry2, material );
         mesh1.position.set(0,0.1,0)
@@ -142,7 +154,7 @@ class HouseTemplate extends Component {
         const resultBSP = mesh1BSP.subtract(mesh2BSP)
         const result = resultBSP.toMesh()
         // const loader = new THREE.TextureLoader()
-        // const texture = loader.load(require('./images/default_floor.jpeg')); 
+        // const texture = loader.load((`${process.env.PUBLIC_URL}/images/default_floor.jpeg`)); 
         // const resMaterial = new THREE.MeshLambertMaterial( { map: texture } );
         result.geometry.computeFaceNormals()
         result.geometry.computeVertexNormals()
@@ -155,7 +167,7 @@ class HouseTemplate extends Component {
         //walls
         const geometry3 = new THREE.BoxGeometry(8, 4, 2);
         const geometry4 = new THREE.BoxGeometry(7.80, 4, 2);
-        // const wallMaterial = new THREE.MeshLambertMaterial( { color: new THREE.Color('#E4B56A') } );
+        // const wallMaterial = new THREE.MeshLambertMaterial( { color: new THREE.Color('#FBD460') } );
         const wallMaterial = new THREE.MeshLambertMaterial( { color: new THREE.Color('#EFD0D6') } );
         const mesh3 = new THREE.Mesh( geometry3, wallMaterial );
         const mesh4 = new THREE.Mesh( geometry4, wallMaterial );
@@ -224,7 +236,7 @@ class HouseTemplate extends Component {
     animate =() => {
         requestAnimationFrame( this.animate );
         if (this.obj) {
-          this.obj.rotation.x += 0.01;
+          // this.obj.rotation.x += 0.01;
           // this.obj.rotation.y += 0.01;
         }
         
@@ -256,7 +268,7 @@ class HouseTemplate extends Component {
     });
     }
 
-    loadObj = (objUrl, mtlUrl) => {
+    loadObj = (objUrl, mtlUrl, cat) => {
 
       const loader = new OBJLoader()
 
@@ -279,10 +291,14 @@ class HouseTemplate extends Component {
                }
            });
 
-           geometry.scale.set(1, 1, 1);
-           geometry.rotation.x = -2;
-           this.obj = geometry
-           this.scene.add(geometry);
+          //  geometry.rotation.x = -2;
+          var _objs = this.state.objs
+          _objs[cat] = geometry
+          this.setState({
+            objs: _objs
+          })
+          this.placeFurniture(cat)
+          this.scene.add(geometry);
        });
     }
 
@@ -336,6 +352,27 @@ class HouseTemplate extends Component {
                     </Modal>
                 </div>
           );
+    }
+
+    placeFurniture(cat) {
+      this.state.objs[cat].scale.set(0.8, 0.8, 0.8);
+      if (cat == 5) {
+        this.state.objs[5].scale.set(0.7, 0.7, 0.7);
+        this.state.objs[5].rotation.x = -0.1
+        this.state.objs[5].position.set(0, -1, -0.6)
+      } else if (cat == 3) {
+        this.state.objs[3].rotation.y = -1
+        this.state.objs[3].rotation.x = -0.2
+        this.state.objs[3].position.set(1.5, -1, -0.2)
+      } else if (cat == 4) {
+        // this.state.objs[4].rotation.y = -1
+        this.state.objs[4].rotation.x = -0.2
+        this.state.objs[4].position.set(0, -1, 0)
+      } else if (cat == 1) {
+        // this.state.objs[cat].scale.set(0.7, 0.7, 0.7);
+        this.state.objs[1].rotation.y = 1.8
+        this.state.objs[1].position.set(-1.8, -1, -0.2)
+      }
     }
 }
 
