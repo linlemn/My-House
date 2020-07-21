@@ -11,6 +11,9 @@ import camera from './icons/camera.svg'
 import album from './icons/album.svg'
 import gallery from './icons/gallery.svg'
 import refresh from './icons/refresh.svg'
+import meshHouse from './icons/meshHouse.svg'
+import voxHouse from './icons/voxHouse.svg'
+
 
 import Modal from 'react-modal';
 import {OBJLoader, MTLLoader} from 'three-obj-mtl-loader';
@@ -54,7 +57,18 @@ class HouseTemplate extends Component {
             loading: false,
             clickType: -1,
             items: ['gallery', 'camera', 'album'],
-            objs: {}
+            objs: {},
+            iconDisplayState: {
+              'sofa': true,
+              'table': true,
+              'lamp': true,
+              'chair': true,
+              'bookshelf': true
+            }, 
+            meshOrVox: 'mesh',
+            galleryImages: {
+
+            }
         }
     }
     componentDidMount() {
@@ -106,11 +120,13 @@ class HouseTemplate extends Component {
         // const bgTexture = loader.load(process.env.PUBLIC_URL + '/images/bg3.jpg'); 
         // scene.background = bgTexture;
 
-        this.loadObj(`${process.env.PUBLIC_URL}/000041.obj`, `${process.env.PUBLIC_URL }/000041.png`, 5)
-        this.loadObj(`${process.env.PUBLIC_URL}/000022.obj`, `${process.env.PUBLIC_URL }/000022.png`, 3)
-        this.loadObj(`${process.env.PUBLIC_URL}/0000033.obj`, `${process.env.PUBLIC_URL }/0000033.png`, 4)
-        this.loadObj(`${process.env.PUBLIC_URL}/0003753.obj`, `${process.env.PUBLIC_URL }/0003753.png`, 1)
+        // this.loadObj(`${process.env.PUBLIC_URL}/000041.obj`, `${process.env.PUBLIC_URL }/000041.png`, 5)
+        // this.loadObj(`${process.env.PUBLIC_URL}/000022.obj`, `${process.env.PUBLIC_URL }/000022.png`, 3)
+        // this.loadObj(`${process.env.PUBLIC_URL}/0000033.obj`, `${process.env.PUBLIC_URL }/0000033.png`, 4)
+        // this.loadObj(`${process.env.PUBLIC_URL}/0003753.obj`, `${process.env.PUBLIC_URL }/0003753.png`, 1)
       
+        document.addEventListener('mousedown', this.onFurnitureClick, false);
+
         this.createRoom()
         this.createIcon()
         this.animate()
@@ -240,7 +256,6 @@ class HouseTemplate extends Component {
           // this.obj.rotation.y += 0.01;
         }
         
-        // this.line.rotation.x += 0.02
         this.renderer.render( this.scene, this.camera );
       }
   
@@ -268,7 +283,7 @@ class HouseTemplate extends Component {
     });
     }
 
-    loadObj = (objUrl, mtlUrl, cat) => {
+    loadObj = (objUrl, mtlUrl, type) => {
 
       const loader = new OBJLoader()
 
@@ -292,34 +307,84 @@ class HouseTemplate extends Component {
            });
 
           //  geometry.rotation.x = -2;
-          var _objs = this.state.objs
-          _objs[cat] = geometry
+          const objs = this.state.objs
+          objs[type] = geometry
           this.setState({
-            objs: _objs
+            objs
           })
-          this.placeFurniture(cat)
+          this.placeFurniture(type)
+          geometry.name = type
           this.scene.add(geometry);
        });
     }
 
-    getChildrenMsg = (children, msg) => {
+    getChildrenMsg = (type, galleryImage) => {
+      this.loadObj(galleryImage.mesh, galleryImage.texture, type)
+      let iconDisplayState = this.state.iconDisplayState
+      iconDisplayState[type] = false
+      const galleryImages = this.state
+      galleryImages[type] = galleryImage
       this.setState({
-        childrenMsg: msg
+        iconDisplayState,
+        modalIsOpen: false,
+        galleryImages
       })
     }
 
+    onHouseTypeIconClick = type => {
+      this.setState({
+        meshOrVox: type
+      })
+    }
+
+    onFurnitureClick = event => {
+      event.preventDefault();
+      let objects=[];
+      const raycaster = new THREE.Raycaster();
+      let mouse = new THREE.Vector2();
+      //监听全局点击事件,通过ray检测选中哪一个object
+      mouse.x = (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1;
+    　 mouse.y = - (event.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
+    
+
+    　  raycaster.setFromCamera(mouse, this.camera);
+    　　this.scene.children.forEach(child => {
+    　　　　if (child instanceof THREE.Mesh) {//根据需求判断哪些加入objects,也可以在生成object的时候push进objects
+    　　　　　　objects.push(child)
+    　　　　}
+
+      for (let type in this.state.objs) {
+        const object = this.state.objs[type]
+        let intersects = raycaster.intersectObject(object, true);
+        if (intersects.length > 0) {
+          // type是字符串
+          const  ldr = this.state.galleryImages[type].ldr.split('/').pop()
+          　　window.location.href = (`http://103.79.27.148:8081/?model=${ldr}`)
+          }
+      }
+      }, false)
+    }
+
     render() {
-        const { modalIsOpen, items, loading, clickType } = this.state
+        const { modalIsOpen, items, loading, clickType, iconDisplayState, meshOrVox} = this.state
           return (
               <div
                   className= "canvas"
                   ref={(mount) => { this.mount = mount }}
               >
-                  <img className="icon sofa" id="sofa" src={sofa} onClick={e => {this.toggleModal('sofa', e)}} />
-                  <img className="icon table" id="table" src={table} onClick={e => {this.toggleModal('table', e)}} />
-                  <img className="icon chair" id="chair" src={chair} onClick={e => {this.toggleModal('chair', e)}} />
-                  <img className="icon lamp" id="lamp" src={lamp} onClick={e => {this.toggleModal('lamp', e)}} />
-                  <img className="icon bookshelf" id="bookshelf" src={bookshelf} onClick={e => {this.toggleModal('bookshelf', e)}} />
+                <div className="house-type-wrapper">
+                  <img src={meshHouse} className={meshOrVox == 'mesh' ? 'house-selected' : 'house-unselected'} onClick={e => {
+                    this.onHouseTypeIconClick('mesh')
+                  }}></img>
+                  <img src={voxHouse} className={meshOrVox == 'vox' ? 'house-selected' : 'house-unselected'} onClick={e => {
+                    this.onHouseTypeIconClick('vox')
+                  }}></img>
+                </div>
+                  {iconDisplayState['sofa'] && <img className="icon sofa" id="sofa" src={sofa} onClick={e => {this.toggleModal('sofa', e)}} />}
+                  {iconDisplayState['table'] && <img className="icon table" id="table" src={table} onClick={e => {this.toggleModal('table', e)}} />}
+                  {iconDisplayState['chair'] && <img className="icon chair" id="chair" src={chair} onClick={e => {this.toggleModal('chair', e)}} />}
+                  {iconDisplayState['lamp'] && <img className="icon lamp" id="lamp" src={lamp} onClick={e => {this.toggleModal('lamp', e)}} />}
+                  {iconDisplayState['bookshelf'] && <img className="icon bookshelf" id="bookshelf" src={bookshelf} onClick={e => {this.toggleModal('bookshelf', e)}} />}
                   <Modal
                     closeTimeoutMS={150}
                     contentLabel="modalA"
@@ -354,24 +419,26 @@ class HouseTemplate extends Component {
           );
     }
 
-    placeFurniture(cat) {
-      this.state.objs[cat].scale.set(0.8, 0.8, 0.8);
-      if (cat == 5) {
-        this.state.objs[5].scale.set(0.7, 0.7, 0.7);
-        this.state.objs[5].rotation.x = -0.1
-        this.state.objs[5].position.set(0, -1, -0.6)
-      } else if (cat == 3) {
-        this.state.objs[3].rotation.y = -1
-        this.state.objs[3].rotation.x = -0.2
-        this.state.objs[3].position.set(1.5, -1, -0.2)
-      } else if (cat == 4) {
+    placeFurniture(type) {
+      this.state.objs[type].scale.set(0.8, 0.8, 0.8);
+      if (type == 'sofa') {
+        this.state.objs[type].scale.set(0.7, 0.7, 0.7);
+        this.state.objs[type].rotation.x = -0.1
+        this.state.objs[type].position.set(0, -1, -0.6)
+      } else if (type == 'chair') {
+        // chair
+        // this.state.objs[3].rotation.y = -1
+        // this.state.objs[3].rotation.x = -0.2
+        this.state.objs[type].position.set(1.5, -1, -0.2)
+      } else if (type == 'table') {
         // this.state.objs[4].rotation.y = -1
-        this.state.objs[4].rotation.x = -0.2
-        this.state.objs[4].position.set(0, -1, 0)
-      } else if (cat == 1) {
+        this.state.objs[type].rotation.x = -0.2
+        this.state.objs[type].position.set(0, -1, 0)
+        this.state.objs[type].scale.set(0.7, 0.7, 0.7);
+      } else if (type == 'bookshelf') {
         // this.state.objs[cat].scale.set(0.7, 0.7, 0.7);
-        this.state.objs[1].rotation.y = 1.8
-        this.state.objs[1].position.set(-1.8, -1, -0.2)
+        this.state.objs[type].rotation.y = 1.8
+        this.state.objs[type].position.set(-1.8, -1, -0.2)
       }
     }
 }
@@ -457,7 +524,9 @@ class Item extends Component {
               src: `http://103.79.27.148:8001/${cat[j].image}`,
               alt: cat[j].style,
               mesh: cat[j].model,
-              texture: cat[j].texture
+              texture: cat[j].texture,
+              vox: cat[j].vox[0],
+              ldr: cat[j].ldr[0]
             })
           }
         }
@@ -485,8 +554,12 @@ class Item extends Component {
     }
 
     onGalleryImageClick = index => {
-      const {selection, galleryImages} = this.props
-      this.props.parent.getChildrenMsg(this, selection, galleryImages(index))
+      const {type} = this.props
+      const {galleryImages} = this.state
+      this.props.parent.getChildrenMsg(type, galleryImages[index])
+      this.setState({
+        isOpen: false
+      })
     }
 
     onRefreshClick = async () => {
@@ -536,7 +609,7 @@ class Item extends Component {
           >
             {
               loading ? (<p> loading... </p>) : <div className="gallery-images-wrapper">
-                <div className="gallery-image-wrapper" onClick={count => {
+                <div className="gallery-image-wrapper" onClick={e => {
                   this.onGalleryImageClick(count)
                 }}>
                    <Zmage
@@ -548,7 +621,7 @@ class Item extends Component {
                     />
                   <div className="style-text">{galleryImages[count].alt}</div>
                  </div>
-                 <div className="gallery-image-wrapper" onClick={count => {
+                 <div className="gallery-image-wrapper" onClick={e => {
                   this.onGalleryImageClick(count+1)
                   }}>
                    <Zmage
@@ -560,7 +633,7 @@ class Item extends Component {
                     />
                   <div className="style-text">{galleryImages[count+1].alt}</div>
                  </div>
-                 <div className="gallery-image-wrapper" onClick={count => {
+                 <div className="gallery-image-wrapper" onClick={e => {
                   this.onGalleryImageClick(count+2)
                   }}>
                    <Zmage

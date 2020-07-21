@@ -107,3 +107,27 @@
       width: 30px;
       height: 30px;
   }
+
+  .house-type-wrapper {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    left: 0;
+    right: 0;
+    top: 1%;
+  }
+
+  .house-selected {
+      width: 35px;
+      margin: 10px;
+      box-shadow: 5px 5px 5px rgba(0,0,0,0.15);   
+      border-radius: 50%;    
+  }
+
+  .house-unselected {
+    width: 25px;
+    margin: 10px;
+    box-shadow: 5px 5px 5px rgba(0,0,0,0.15);   
+    border-radius: 50%;   
+  }
