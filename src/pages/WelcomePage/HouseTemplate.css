@@ -73,3 +73,37 @@
     left: 0;
 }
 
+.gallery-images-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.gallery-image-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.gallery-image {
+    width: 160px;
+    margin: 10px;
+    border-radius: 10%;
+    box-shadow: 5px 5px 5px rgba(0,0,0,0.15);
+}
+
+.style-text {
+    font-size: 1.3rem;
+    font-weight: 100;
+    color: #F7A207;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    text-align: center;
+  }
+
+  .refresh {
+      margin-left: 20px;
+      width: 30px;
+      height: 30px;
+  }

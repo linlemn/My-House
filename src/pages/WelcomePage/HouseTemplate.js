@@ -10,21 +10,20 @@ import bookshelf from './icons/bookshelf.png'
 import camera from './icons/camera.svg'
 import album from './icons/album.svg'
 import gallery from './icons/gallery.svg'
+import refresh from './icons/refresh.svg'
 
 import Modal from 'react-modal';
 import {OBJLoader, MTLLoader} from 'three-obj-mtl-loader';
-
-import axios from 'axios';
-import qs from 'qs';
+import Zmage from 'react-zmage'
 
 const ThreeBSP = require('tthreebsp')(THREE)
 
 const _SUPER_CATEGORIES_3D =
 {
-  'shelf': 1,
+  'bookshelf': 1,
   'sofa': 5,
   'chair': 3,
-  'lighting': 7,
+  'lamp': 7,
   'table': 4
 }
 //  [
@@ -285,6 +284,12 @@ class HouseTemplate extends Component {
        });
     }
 
+    getChildrenMsg = (children, msg) => {
+      this.setState({
+        childrenMsg: msg
+      })
+    }
+
     render() {
         const { modalIsOpen, items, loading, clickType } = this.state
           return (
@@ -322,7 +327,7 @@ class HouseTemplate extends Component {
                         {loading ? (
                           <p>Loading...</p>
                           ) : (
-                          <List items={items} type={clickType} />
+                          <List items={items} type={clickType} parent={this} />
                           )
                         }
                       </div>
@@ -337,14 +342,15 @@ class Item extends Component {
       super(props);
       this.state = {
         isOpen: false,
-        loading: false,
+        loading: true,
+        browsing: false,
+        count: 0,
       };
     }
   
     toggleModal = index => event => {
       this.setState({
         isOpen: !this.state.isOpen,
-        loading: true,
       });
       console.log("NESTED MODAL ITEM", index, this.state.isOpen);
     };
@@ -377,91 +383,160 @@ class Item extends Component {
         ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
       }
       return ret
-  }
+    }
 
-    handleOnAfterOpenModal = () => {
-      const {type} = this.props
-      fetch('/photos/gallery', {
-        method: 'post',
-        body: this.transformRequest({
-          category: _SUPER_CATEGORIES_3D[type]
-        }),
-        mode: 'cors',
-        headers:{
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }, 
-      }).then(function (response) {
-        console.log(response);
-        this.setState({
-          loading: false
+    shuffle = arr => {
+      for (let i = 1; i < arr.length; i++) {
+        const random = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[random]] = [arr[random], arr[i]];
+    }
+    return arr
+    }
+
+
+    handleOnAfterOpenModal = async () => {
+      const { type } = this.props
+
+      try {
+        const res = await fetch('/photos/gallery', {
+          method: 'post',
+          body: this.transformRequest({
+            category: _SUPER_CATEGORIES_3D[type]
+          }),
+          mode: 'cors',
+          headers:{
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }, 
         })
+        const resJson = await res.json()
+
+        let galleryImages = []
+        for (let i in resJson) {
+          const cat = resJson[i]
+          for (let j in cat) {
+            galleryImages.push({
+              src: `http://103.79.27.148:8001/${cat[j].image}`,
+              alt: cat[j].style,
+              mesh: cat[j].model,
+              texture: cat[j].texture
+            })
+          }
+        }
+
+        this.setState({
+          galleryImages: this.shuffle(galleryImages),
+          loading: false,
+          count: 0,
+        })
+       } catch (err) {
+        console.log(err);
+      }
+    }
+
+    onBrowsingClose = () => {
+      const state = this.state.browsing
+      this.setState({
+        browsing: !state,
+      }, () => {
+        if (state) {
+          const zmage = document.getElementById("zmage")
+          zmage.parentNode.removeChild(zmage)
+        }
       })
-      .catch(function (error) {
-        console.log(error);
-      });
-      // axios.post('/photos/gallery', qs.stringify({
-      //   category: _SUPER_CATEGORIES_3D[selection]
-      // }))
-      // .then(function (response) {
-      //   console.log(response);
-      //   this.setState({
-      //     loading: false
-      //   })
-      // })
-      // .catch(function (error) {
-      //   console.log(error);
-      // });
+    }
 
-      // // when ready, we can access the available refs.
-      // (new Promise((resolve, reject) => {
-      //     setTimeout(() => resolve(true), 500);
-      // })).then(res => {
-      //     this.setState({
-      //     // items: [1, 2, 3, 4, 5].map(x => `Item ${x}`),
-      //     // items: ['gallery', 'camera', 'album'],
-      //     loading: false
-      //     });
-      // });
-      }
+    onGalleryImageClick = index => {
+      const {selection, galleryImages} = this.props
+      this.props.parent.getChildrenMsg(this, selection, galleryImages(index))
+    }
 
-    displayModalContent = selection => {
-      switch (selection) {
-        case 'camera':
-          return <img src={camera} /> 
-        case 'gallery':
-          return  <div className="gallery-wrapper">
-            
-          </div>
-         
-        case 'album':
-          return <img src={album} /> 
-        default:
-          return
+    onRefreshClick = async () => {
+      const { count, galleryImages } = this.state
+      console.log(galleryImages)
+      if ((galleryImages.length - 3) < count) {
+        this.setState({
+          loading: true,
+        }, async () => {
+          await this.handleOnAfterOpenModal()
+        })
       }
+      else 
+        this.setState({
+          count: count+3
+        })
     }
   
     render() {
-      const { isOpen } = this.state;
+      const { isOpen, loading, galleryImages, browsing, count } = this.state;
       const { selection, index } = this.props;
       const toggleModal = this.toggleModal(index);
-    
       return (
         <div className="selection-wrapper">
           {
             this.displaySelection(selection)
           }
           <Modal 
-          closeTimeoutMS={150}
           contentLabel="modalB"
           isOpen={isOpen}
           onRequestClose={toggleModal}
           ariaHideApp={false}
           onAfterOpen={this.handleOnAfterOpenModal}
+          style={{
+            content: {
+                position: 'absolute',
+                top: '10%',
+                left: '10%',
+                right: '10%',
+                bottom: '10%',
+                backgroundColor: '#ffffff',
+                border: 'None',
+                boxShadow: '5px 5px 10px rgba(0,0,0,0.25)',
+                borderRadius: '25px',
+              }
+          }}
           >
-            {/* <h1 id="item_title">Item: {index + 1}</h1>
-            <div id="item_info">
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur pulvinar varius auctor. Aliquam maximus et justo ut faucibus. Nullam sit amet urna molestie turpis bibendum accumsan a id sem. Proin ullamcorper nisl sapien, gravida dictum nibh congue vel. Vivamus convallis dolor vitae ipsum ultricies, vitae pulvinar justo tincidunt. Maecenas a nunc elit. Phasellus fermentum, tellus ut consectetur scelerisque, eros nunc lacinia eros, aliquet efficitur tellus arcu a nibh. Praesent quis consequat nulla. Etiam dapibus ac sem vel efficitur. Nunc faucibus efficitur leo vitae vulputate. Nunc at quam vitae felis pretium vehicula vel eu quam. Quisque sapien mauris, condimentum eget dictum ut, congue id dolor. Donec vitae varius orci, eu faucibus turpis. Morbi eleifend orci non urna bibendum, ac scelerisque augue efficitur.</p>
-            </div> */}
+            {
+              loading ? (<p> loading... </p>) : <div className="gallery-images-wrapper">
+                <div className="gallery-image-wrapper" onClick={count => {
+                  this.onGalleryImageClick(count)
+                }}>
+                   <Zmage
+                    src={galleryImages[count].src}
+                    alt="展示序列图片"
+                    preset="mobile"
+                    className="gallery-image"
+                    browsing={browsing}
+                    />
+                  <div className="style-text">{galleryImages[count].alt}</div>
+                 </div>
+                 <div className="gallery-image-wrapper" onClick={count => {
+                  this.onGalleryImageClick(count+1)
+                  }}>
+                   <Zmage
+                    src={galleryImages[count+1].src}
+                    alt="展示序列图片"
+                    preset="mobile"
+                    className="gallery-image"
+                    browsing={browsing}
+                    />
+                  <div className="style-text">{galleryImages[count+1].alt}</div>
+                 </div>
+                 <div className="gallery-image-wrapper" onClick={count => {
+                  this.onGalleryImageClick(count+2)
+                  }}>
+                   <Zmage
+                    src={galleryImages[count+2].src}
+                    alt="展示序列图片"
+                    preset="mobile"
+                    className="gallery-image"
+                    browsing={browsing}
+                    />
+                  <div className="style-text">{galleryImages[count+2].alt}</div>
+                 </div>
+                  <img className="refresh" src={refresh} onClick={this.onRefreshClick} />
+              </div>
+             
+            }
           </Modal>
         </div>
       );
@@ -471,7 +546,7 @@ class Item extends Component {
   class List extends Component {
     render() {
       return this.props.items.map((selection, index) => (
-        <Item key={index} index={index} selection={selection} type={this.props.type} />
+        <Item key={index} index={index} selection={selection} type={this.props.type} parent={this.props.parent} />
       ));
     }
   }
