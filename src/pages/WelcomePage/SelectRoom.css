@@ -1,0 +1,41 @@
+.SelectRoom {
+    background-color: #FBD460;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: hidden;
+}
+
+.ant-carousel .slick-slide {
+    overflow: hidden;
+    text-align: center;
+    /* height: 100%; */
+    line-height: 375px;
+    width: 200px;
+    background: #FBD460;
+    overflow: hidden;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  
+  .ant-carousel .slick-slide h3 {
+    color: #fff;
+    position: relative;
+    top: -100px;
+    font-size: 1.8rem;
+  }
+
+  .carouselImg {
+      position: relative;
+      top: 50px;
+      left: 37.5%;
+      width: 25%;
+      height: 25%;
+  }
+
+  .slick-dots {
+      position: absolute;
+      top: 340px;
+      overflow: hidden;
+  }
