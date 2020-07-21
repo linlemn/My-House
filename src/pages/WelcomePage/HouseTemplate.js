@@ -163,11 +163,12 @@ class HouseTemplate extends Component {
         const mesh3BSP = new ThreeBSP(mesh3);
         const mesh4BSP = new ThreeBSP(mesh4);
         var wallResultBSP = mesh3BSP.subtract(mesh4BSP);
-        const geometry5 = new THREE.BoxGeometry(2.1, 3.9, 2.2);
+        const geometry5 = new THREE.BoxGeometry(8, 3.6, 1.4);
         // const wdMaterial = new THREE.MeshPhongMaterial( { color: new THREE.Color('#D6AF9C'), shininess:5} );
         const wdMaterial = new THREE.MeshPhongMaterial( { color: new THREE.Color('#FFFFFF'), shininess:5} );
         const mesh5 = new THREE.Mesh( geometry5, wdMaterial );
-        mesh5.position.set(-2, 0.1, 0);
+        // mesh5.position.set(-2, 0.1, 0);
+        mesh5.position.set(1, 0, 0);
         const mesh5BSP = new ThreeBSP(mesh5);
         wallResultBSP = wallResultBSP.subtract(mesh5BSP);
         const wallResult = wallResultBSP.toMesh()
@@ -196,14 +197,15 @@ class HouseTemplate extends Component {
         // });
     
 
-        const geometry6 = new THREE.BoxGeometry(2.1, 4, 0.06);
+        const geometry6 = new THREE.BoxGeometry(0.1, 3.6, 1.4);
         const mesh6 = new THREE.Mesh( geometry6, wdMaterial );
         // mesh6.position.set(-1.99, 0, -2.98);
-        const geometry7 = new THREE.BoxGeometry(0.9, 3.6, 1);
+        const geometry7 = new THREE.BoxGeometry(0.1, 3.4, 0.6);
+        const geometry8 = new THREE.BoxGeometry(0.1, 3.4, 0.6);
         const mesh7 = new THREE.Mesh( geometry7, wdMaterial );
-        mesh7.position.set(0.5, 0, 0.03);
-        const mesh8 = new THREE.Mesh( geometry7, wdMaterial );
-        mesh8.position.set(-0.5, 0, 0.03);
+        mesh7.position.set(0, 0, 0.35);
+        const mesh8 = new THREE.Mesh( geometry8, wdMaterial );
+        mesh8.position.set(0, 0, -0.3);
         const mesh6BSP = new ThreeBSP(mesh6);
         const mesh7BSP = new ThreeBSP(mesh7);
         const mesh8BSP = new ThreeBSP(mesh8);
@@ -214,7 +216,7 @@ class HouseTemplate extends Component {
         wdResult.geometry.computeVertexNormals()
         wdResult.material = wdMaterial;
         this.wdResult = wdResult
-        wdResult.position.set(-1.99, 0, -2.98);
+        wdResult.position.set(4, 0, -1.9);
         this.scene.add(wdResult);
         
     }
