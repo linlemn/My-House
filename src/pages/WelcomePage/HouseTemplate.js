@@ -20,6 +20,8 @@ import Modal from 'react-modal';
 import {OBJLoader, MTLLoader} from 'three-obj-mtl-loader';
 import Zmage from 'react-zmage'
 
+import axios from 'axios';
+
 const ThreeBSP = require('tthreebsp')(THREE)
 
 const _SUPER_CATEGORIES_3D =
@@ -617,22 +619,39 @@ class Item extends Component {
       e.preventDefault();
       const {selectedAlbumImage} = this.state
       const {type} = this.props
-      const formdata = new FormData();
+      let formdata = new FormData();
       const imageData =  selectedAlbumImage
+      console.log(imageData)
       formdata.append('file', imageData);
       formdata.append('category', _SUPER_CATEGORIES_3D[type]);
 
-      const res = await fetch('/photos/basic-upload/', {
-        method: 'post', 
-        body: formdata,
-        mode: 'cors',
-        headers:{
-          'Content-Type': 'multipart/form-data'
-        }, 
-      })
+      // const res = await fetch('/photos/basic-upload', {
+      //   method: 'post', 
+      //   body: formdata,
+      //   mode: 'no-cors',
+      //   headers:{
+      //     'Content-Type': 'multipart/form-data'
+      //   }, 
+      // })
 
-      const resJson = await res.json()
-      console.log(resJson)
+      // const resJson = await res.json()
+      // console.log(resJson)
+
+      axios.post(
+        '/photos/basic-upload/',
+        formdata,
+        {
+            headers: {
+                "Content-type": "multipart/form-data",
+            },                    
+        }
+    )
+    .then(res => {
+        console.log(`Success` + res.data);
+    })
+    .catch(err => {
+        console.log(err);
+    })
     }
 
     displayModalContent = () => {

@@ -25,15 +25,9 @@ ReactDOM.render(
             <Route exact path="/">
               <WelcomePage />
             </Route>
-            <CSSTransition
-              appear={true}
-              classNames="appAppear"
-              timeout={500}
-            >
-              <Route exact path="/HouseTemplate">
-                <HouseTemplate />
-              </Route>
-            </CSSTransition>
+            <Route exact path="/HouseTemplate">
+              <HouseTemplate />
+            </Route>
             <TransitionGroup>
               <CSSTransition
                 appear={true}

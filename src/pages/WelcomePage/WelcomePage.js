@@ -32,7 +32,7 @@ class WelcomePage extends Component {
           <div className="WelcomePage">
             {/* <img src={toy}  className="backLego"></img> */}
               <div>
-              <Shake h={50} v={50} r={30} dur={3000} int={10} max={100} fixed={true} fixedStop={true} freez={true}>
+              <Shake h={50} v={10} r={30} dur={3000} int={10} max={100} fixed={true} fixedStop={true} freez={true}>
                 <p className="titleText">Do You Wanna build<p class="titleTextY"> LEGO ROOM? </p></p></Shake>
                 {/* <Shake h={10} v={0} r={3}><p class="titleTextY"> LEGO ROOM? </p></Shake> */}
               </div>
