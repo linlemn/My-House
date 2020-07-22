@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link, BrowserRouter as Router, Switch, Route, Redirect, withRouter } from 'react-router-dom';
-import HouseTemplate from './HouseTemplate'
+import { Shake } from 'reshake'
 
 import toy from './icons/Lego-Toy.png'
 import process from './icons/Process.png'
@@ -31,8 +31,11 @@ class WelcomePage extends Component {
         <Router>
           <div className="WelcomePage">
             {/* <img src={toy}  className="backLego"></img> */}
-            <text className="titleText">Do You Wanna</text>
-            <text className="titleText">build<text class="titleTextY"> LEGO ROOM? </text></text>
+              <div>
+              <Shake h={50} v={50} r={30} dur={3000} int={10} max={100} fixed={true} fixedStop={true} freez={true}>
+                <p className="titleText">Do You Wanna build<p class="titleTextY"> LEGO ROOM? </p></p></Shake>
+                {/* <Shake h={10} v={0} r={3}><p class="titleTextY"> LEGO ROOM? </p></Shake> */}
+              </div>
             <img src={process} className="progress"></img>
             <img src={right} className="startIcon" onClick={this.clickStart}></img>
             <text className="startText">Let's start!</text>
