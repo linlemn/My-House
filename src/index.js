@@ -25,19 +25,25 @@ ReactDOM.render(
             <Route exact path="/">
               <WelcomePage />
             </Route>
-            <Route exact path="/HouseTemplate">
-              <HouseTemplate />
-            </Route>
-            <TransitionGroup>
             <CSSTransition
-          appear={true}
-          classNames="appAppear"
-          timeout={500}
-        >
-            <Route exact path="/SelectRoom">
-              <SelectRoom />
-            </Route>
+              appear={true}
+              classNames="appAppear"
+              timeout={500}
+            >
+              <Route exact path="/HouseTemplate">
+                <HouseTemplate />
+              </Route>
             </CSSTransition>
+            <TransitionGroup>
+              <CSSTransition
+                appear={true}
+                classNames="appAppear"
+                timeout={500}
+              >
+                <Route exact path="/SelectRoom">
+                  <SelectRoom />
+                </Route>
+              </CSSTransition>
             </TransitionGroup>
           </Switch></CSSTransition>
       </TransitionGroup></Router>
