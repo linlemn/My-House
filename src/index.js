@@ -14,18 +14,33 @@ import { TransitionGroup, CSSTransition } from 'react-transition-group'
 ReactDOM.render(
   // <React.StrictMode>
   <div>
-    {/* <WelcomePage /> */}
-    <Router><Switch>
-              <Route exact path="/">
-                <WelcomePage />
-              </Route>
-              <Route exact path="/SelectRoom">
-                <SelectRoom />
-              </Route>
-              <Route exact path="/HouseTemplate">
-                <HouseTemplate />
-              </Route>
-            </Switch></Router>
+    <Router>
+      <TransitionGroup>
+        <CSSTransition
+          appear={true}
+          classNames="appAppear"
+          timeout={500}
+        >
+          <Switch>
+            <Route exact path="/">
+              <WelcomePage />
+            </Route>
+            <Route exact path="/HouseTemplate">
+              <HouseTemplate />
+            </Route>
+            <TransitionGroup>
+            <CSSTransition
+          appear={true}
+          classNames="appAppear"
+          timeout={500}
+        >
+            <Route exact path="/SelectRoom">
+              <SelectRoom />
+            </Route>
+            </CSSTransition>
+            </TransitionGroup>
+          </Switch></CSSTransition>
+      </TransitionGroup></Router>
   </div>
   //  </React.StrictMode>
   ,
