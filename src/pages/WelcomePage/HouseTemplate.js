@@ -466,36 +466,17 @@ class Item extends Component {
 				} else if (window.webkitURL != undefined) {
 					url = await window.webkitURL.createObjectURL(file)
         }
-      }
-      if (selection == 'album') 
         this.setState({
           isOpen: !this.state.isOpen,
-          selectedAlbumImage: url
+          selectedAlbumImageUrl: url,
+          selectedAlbumImage: file
         });
-      else 
+      }
+      if (selection == 'gallery') 
         this.setState({
           isOpen: !this.state.isOpen,
         });
     };
-
-    onAlbumFileChange = async e => {
-      e.preventDefault();
-      const file  = e.target.files[0]
-      const formdata = new FormData();
-      formdata.append('file', file);
-
-      const res = await fetch('/photos/upload', {
-        method: 'post', 
-        body: formdata,
-        mode: 'cors',
-        headers:{
-          'Content-Type': 'multi-part/form-data'
-        }, 
-      })
-
-      const resJson = await res.json()
-      console.log(resJson)
-    }
 
     displaySelection = selection => {
       const toggleModal = this.toggleModal(selection);
@@ -537,44 +518,52 @@ class Item extends Component {
 
 
     handleOnAfterOpenModal = async () => {
-      const { type } = this.props
+      const { type, selection } = this.props
 
-      try {
-        const res = await fetch('/photos/gallery', {
-          method: 'post',
-          body: this.transformRequest({
-            category: _SUPER_CATEGORIES_3D[type]
-          }),
-          mode: 'cors',
-          headers:{
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }, 
-        })
-        const resJson = await res.json()
-
-        let galleryImages = []
-        for (let i in resJson) {
-          const cat = resJson[i]
-          for (let j in cat) {
-            galleryImages.push({
-              src: `http://103.79.27.148:8001/${cat[j].image}`,
-              alt: cat[j].style,
-              mesh: cat[j].model,
-              texture: cat[j].texture,
-              vox: cat[j].vox[0],
-              ldr: cat[j].ldr[0]
-            })
+      console.log(selection)
+      if (selection == 'gallery') {
+        try {
+          const res = await fetch('/photos/gallery', {
+            method: 'post',
+            body: this.transformRequest({
+              category: _SUPER_CATEGORIES_3D[type]
+            }),
+            mode: 'cors',
+            headers:{
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }, 
+          })
+          const resJson = await res.json()
+  
+          let galleryImages = []
+          for (let i in resJson) {
+            const cat = resJson[i]
+            for (let j in cat) {
+              galleryImages.push({
+                src: `http://103.79.27.148:8001/${cat[j].image}`,
+                alt: cat[j].style,
+                mesh: cat[j].model,
+                texture: cat[j].texture,
+                vox: cat[j].vox[0],
+                ldr: cat[j].ldr[0]
+              })
+            }
           }
+  
+          this.setState({
+            galleryImages: this.shuffle(galleryImages),
+            loading: false,
+            count: 0,
+          })
+         } catch (err) {
+          console.log(err);
         }
-
+      } else {
         this.setState({
-          galleryImages: this.shuffle(galleryImages),
           loading: false,
-          count: 0,
         })
-       } catch (err) {
-        console.log(err);
       }
+      
     }
 
     onBrowsingClose = () => {
@@ -617,7 +606,7 @@ class Item extends Component {
     getBase64 = file => {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.readAsDataURL(file);
+        reader.readAsArrayBuffer(file);
         reader.onload = () => resolve(reader.result);
         reader.onerror = error => reject(error);
       });
@@ -625,18 +614,19 @@ class Item extends Component {
 
     onConfirmClick = async e => {
       e.preventDefault();
-      const {selectedAlbumImage, type} = this.state
+      const {selectedAlbumImage} = this.state
+      const {type} = this.props
       const formdata = new FormData();
-      formdata.append('image', selectedAlbumImage);
-      formdata.append('category', type);
+      const imageData =  selectedAlbumImage
+      formdata.append('file', imageData);
+      formdata.append('category', _SUPER_CATEGORIES_3D[type]);
 
-
-      const res = await fetch('/photos/upload', {
+      const res = await fetch('/photos/basic-upload/', {
         method: 'post', 
         body: formdata,
         mode: 'cors',
         headers:{
-          'Content-Type': 'multi-part/form-data'
+          'Content-Type': 'multipart/form-data'
         }, 
       })
 
@@ -645,7 +635,7 @@ class Item extends Component {
     }
 
     displayModalContent = () => {
-      const {loading, galleryImages, browsing, count, selectedAlbumImage} = this.state
+      const {loading, galleryImages, browsing, count, selectedAlbumImageUrl} = this.state
       const {selection} = this.props
       if (loading)
         return <p> loading... </p>
@@ -696,7 +686,7 @@ class Item extends Component {
             // this.onGalleryImageClick(count)
           }}>
              <Zmage
-              src={selectedAlbumImage}
+              src={selectedAlbumImageUrl}
               alt="展示序列图片"
               preset="mobile"
               className="album-image"
