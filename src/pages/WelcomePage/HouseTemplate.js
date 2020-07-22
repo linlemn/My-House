@@ -7,12 +7,13 @@ import table from './icons/table.png'
 import chair from './icons/chair.png'
 import lamp from './icons/lamp.png'
 import bookshelf from './icons/bookshelf.png'
-import camera from './icons/camera.svg'
 import album from './icons/album.svg'
 import gallery from './icons/gallery.svg'
 import refresh from './icons/refresh.svg'
 import meshHouse from './icons/meshHouse.svg'
 import voxHouse from './icons/voxHouse.svg'
+import confirm from './icons/confirm.svg'
+import camera from './icons/camera.svg'
 
 
 import Modal from 'react-modal';
@@ -454,15 +455,50 @@ class Item extends Component {
       };
     }
   
-    toggleModal = index => event => {
-      this.setState({
-        isOpen: !this.state.isOpen,
-      });
-      console.log("NESTED MODAL ITEM", index, this.state.isOpen);
+    toggleModal = selection => async event => {
+      let url
+      if (event.target.files) {
+        const file = event.target.files[0]
+        if (window.createObjectURL != undefined) {
+					url = await window.createObjectURL(file)
+				} else if (window.URL != undefined) {
+					url = await window.URL.createObjectURL(file)
+				} else if (window.webkitURL != undefined) {
+					url = await window.webkitURL.createObjectURL(file)
+        }
+      }
+      if (selection == 'album') 
+        this.setState({
+          isOpen: !this.state.isOpen,
+          selectedAlbumImage: url
+        });
+      else 
+        this.setState({
+          isOpen: !this.state.isOpen,
+        });
     };
 
+    onAlbumFileChange = async e => {
+      e.preventDefault();
+      const file  = e.target.files[0]
+      const formdata = new FormData();
+      formdata.append('file', file);
+
+      const res = await fetch('/photos/upload', {
+        method: 'post', 
+        body: formdata,
+        mode: 'cors',
+        headers:{
+          'Content-Type': 'multi-part/form-data'
+        }, 
+      })
+
+      const resJson = await res.json()
+      console.log(resJson)
+    }
+
     displaySelection = selection => {
-      const toggleModal = this.toggleModal(this.props.index);
+      const toggleModal = this.toggleModal(selection);
       switch (selection) {
         case 'camera':
           return <div className="selection" key={selection}>
@@ -476,7 +512,7 @@ class Item extends Component {
         case 'album':
           return  <div className="selection" key={selection}>
             <img src={album} /> 
-            <input type="file" accept="image/*" />  
+            <input type="file" accept="image/*" onChange={toggleModal}/>  
           </div>
         default:
           return
@@ -577,9 +613,105 @@ class Item extends Component {
           count: count+3
         })
     }
+
+    getBase64 = file => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    onConfirmClick = async e => {
+      e.preventDefault();
+      const {selectedAlbumImage, type} = this.state
+      const formdata = new FormData();
+      formdata.append('image', selectedAlbumImage);
+      formdata.append('category', type);
+
+
+      const res = await fetch('/photos/upload', {
+        method: 'post', 
+        body: formdata,
+        mode: 'cors',
+        headers:{
+          'Content-Type': 'multi-part/form-data'
+        }, 
+      })
+
+      const resJson = await res.json()
+      console.log(resJson)
+    }
+
+    displayModalContent = () => {
+      const {loading, galleryImages, browsing, count, selectedAlbumImage} = this.state
+      const {selection} = this.props
+      if (loading)
+        return <p> loading... </p>
+      else {
+        if (selection == 'gallery')
+          return <div className="gallery-images-wrapper">
+          <div className="gallery-image-wrapper" onClick={e => {
+            this.onGalleryImageClick(count)
+          }}>
+             <Zmage
+              src={galleryImages[count].src}
+              alt="展示序列图片"
+              preset="mobile"
+              className="gallery-image"
+              browsing={browsing}
+              />
+            <div className="style-text">{galleryImages[count].alt}</div>
+           </div>
+           <div className="gallery-image-wrapper" onClick={e => {
+            this.onGalleryImageClick(count+1)
+            }}>
+             <Zmage
+              src={galleryImages[count+1].src}
+              alt="展示序列图片"
+              preset="mobile"
+              className="gallery-image"
+              browsing={browsing}
+              />
+            <div className="style-text">{galleryImages[count+1].alt}</div>
+           </div>
+           <div className="gallery-image-wrapper" onClick={e => {
+            this.onGalleryImageClick(count+2)
+            }}>
+             <Zmage
+              src={galleryImages[count+2].src}
+              alt="展示序列图片"
+              preset="mobile"
+              className="gallery-image"
+              browsing={browsing}
+              />
+            <div className="style-text">{galleryImages[count+2].alt}</div>
+           </div>
+            <img className="refresh" src={refresh} onClick={this.onRefreshClick} />
+        </div>
+
+        else if (selection == 'album') {
+          return <div className="album-image-wrapper" onClick={e => {
+            // this.onGalleryImageClick(count)
+          }}>
+             <Zmage
+              src={selectedAlbumImage}
+              alt="展示序列图片"
+              preset="mobile"
+              className="album-image"
+              browsing={browsing}
+              />
+            <img src={confirm} className="confirm-icon" onClick={this.onConfirmClick} />
+           </div>
+        }
+
+      }
+
+    }
   
     render() {
-      const { isOpen, loading, galleryImages, browsing, count } = this.state;
+      const { isOpen } = this.state;
       const { selection, index } = this.props;
       const toggleModal = this.toggleModal(index);
       return (
@@ -608,46 +740,7 @@ class Item extends Component {
           }}
           >
             {
-              loading ? (<p> loading... </p>) : <div className="gallery-images-wrapper">
-                <div className="gallery-image-wrapper" onClick={e => {
-                  this.onGalleryImageClick(count)
-                }}>
-                   <Zmage
-                    src={galleryImages[count].src}
-                    alt="展示序列图片"
-                    preset="mobile"
-                    className="gallery-image"
-                    browsing={browsing}
-                    />
-                  <div className="style-text">{galleryImages[count].alt}</div>
-                 </div>
-                 <div className="gallery-image-wrapper" onClick={e => {
-                  this.onGalleryImageClick(count+1)
-                  }}>
-                   <Zmage
-                    src={galleryImages[count+1].src}
-                    alt="展示序列图片"
-                    preset="mobile"
-                    className="gallery-image"
-                    browsing={browsing}
-                    />
-                  <div className="style-text">{galleryImages[count+1].alt}</div>
-                 </div>
-                 <div className="gallery-image-wrapper" onClick={e => {
-                  this.onGalleryImageClick(count+2)
-                  }}>
-                   <Zmage
-                    src={galleryImages[count+2].src}
-                    alt="展示序列图片"
-                    preset="mobile"
-                    className="gallery-image"
-                    browsing={browsing}
-                    />
-                  <div className="style-text">{galleryImages[count+2].alt}</div>
-                 </div>
-                  <img className="refresh" src={refresh} onClick={this.onRefreshClick} />
-              </div>
-             
+              this.displayModalContent()
             }
           </Modal>
         </div>

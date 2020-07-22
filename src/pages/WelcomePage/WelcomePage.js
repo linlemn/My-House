@@ -35,7 +35,7 @@ class WelcomePage extends Component {
             <text className="titleText">build<text class="titleTextY"> LEGO ROOM? </text></text>
             <img src={process} className="progress"></img>
             <img src={right} className="startIcon" onClick={this.clickStart}></img>
-            <text class="startText">Let's start!</text>
+            <text className="startText">Let's start!</text>
             {/* <Switch>
               <Route exact path="/">
                 <WelcomePage />
