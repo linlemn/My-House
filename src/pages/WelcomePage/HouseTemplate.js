@@ -5,15 +5,15 @@ import './HouseTemplate.css'
 import sofa from './icons/sofa.png'
 import table from './icons/table.png'
 import chair from './icons/chair.png'
-import lamp from './icons/lamp.png'
+import human from './icons/human.svg'
 import bookshelf from './icons/bookshelf.png'
-import album from './icons/album.svg'
-import gallery from './icons/gallery.svg'
+import album from './icons/album.png'
+import gallery from './icons/gallery.png'
 import refresh from './icons/refresh.svg'
 import meshHouse from './icons/meshHouse.svg'
 import voxHouse from './icons/voxHouse.svg'
 import confirm from './icons/confirm.svg'
-import camera from './icons/camera.svg'
+// import camera from './icons/camera.svg'
 
 
 import Modal from 'react-modal';
@@ -57,12 +57,12 @@ class HouseTemplate extends Component {
             currentItem: -1,
             loading: false,
             clickType: -1,
-            items: ['gallery', 'camera', 'album'],
+            items: ['gallery', 'album'],
             objs: {},
             iconDisplayState: {
               'sofa': true,
               'table': true,
-              'lamp': true,
+              'human': true,
               'chair': true,
               'bookshelf': true
             }, 
@@ -384,7 +384,7 @@ class HouseTemplate extends Component {
                   {iconDisplayState['sofa'] && <img className="icon sofa" id="sofa" src={sofa} onClick={e => {this.toggleModal('sofa', e)}} />}
                   {iconDisplayState['table'] && <img className="icon table" id="table" src={table} onClick={e => {this.toggleModal('table', e)}} />}
                   {iconDisplayState['chair'] && <img className="icon chair" id="chair" src={chair} onClick={e => {this.toggleModal('chair', e)}} />}
-                  {iconDisplayState['lamp'] && <img className="icon lamp" id="lamp" src={lamp} onClick={e => {this.toggleModal('lamp', e)}} />}
+                  {iconDisplayState['human'] && <img className="icon human" id="human" src={human} onClick={e => {this.toggleModal('human', e)}} />}
                   {iconDisplayState['bookshelf'] && <img className="icon bookshelf" id="bookshelf" src={bookshelf} onClick={e => {this.toggleModal('bookshelf', e)}} />}
                   <Modal
                     closeTimeoutMS={150}
@@ -404,6 +404,7 @@ class HouseTemplate extends Component {
                             border: 'None',
                             boxShadow: '5px 5px 10px rgba(0,0,0,0.25)',
                             borderRadius: '10%',
+                            padding: '35px',
                           }
                     }}
                     >
@@ -411,7 +412,7 @@ class HouseTemplate extends Component {
                         {loading ? (
                           <p>Loading...</p>
                           ) : (
-                          <List items={items} type={clickType} parent={this} />
+                          <List items={clickType == 'human' ? ['album'] : items} type={clickType} parent={this} />
                           )
                         }
                       </div>
@@ -481,11 +482,11 @@ class Item extends Component {
     displaySelection = selection => {
       const toggleModal = this.toggleModal(selection);
       switch (selection) {
-        case 'camera':
-          return <div className="selection" key={selection}>
-          <img src={camera} /> 
-          <input type="file" accept="image/*" capture="camera" />  
-        </div>
+        // case 'camera':
+        //   return <div className="selection" key={selection}>
+        //   <img src={camera} /> 
+        //   <input type="file" accept="image/*" capture="camera" />  
+        // </div>
         case 'gallery':
           return <div className="selection" key={selection} onClick={toggleModal}>
           <img src={gallery} /> 
