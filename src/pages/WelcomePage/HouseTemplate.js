@@ -428,7 +428,7 @@ class HouseTemplate extends Component {
             }
           }
             // type是字符串
-            const ldr = this.state.galleryImages[type].ldr.split('/').pop()
+            const ldr = this.state.buildingObjectUrls[type].ldr.split('/').pop()
             window.location.href = (`http://103.79.27.148:8081/?model=${ldr}`)
           }
         }
