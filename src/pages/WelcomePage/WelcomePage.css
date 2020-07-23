@@ -25,16 +25,16 @@
   .progress {
     position: relative;
     /* top: 15%; */
-    margin-top: -5%;
+    margin-top: -2%;
     height: 100rpx;
-    width: 40%;
+    width: 65%;
   }
 
   .titleText {
     position: relative;
-    margin-top: 20%;
+    margin-top: -9%;
     /* top: 20%; */
-    font-size: 2.0rem;
+    font-size: 1.6rem;
     font-weight: 100;
     color: white;
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
@@ -44,6 +44,8 @@
   }
   
   .titleTextY {
+    text-align: center;
+    margin-top: 15%;
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-size: 3.0rem;
     font-weight: 900;
