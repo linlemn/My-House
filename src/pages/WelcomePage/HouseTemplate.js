@@ -69,7 +69,7 @@ class HouseTemplate extends Component {
               'bookshelf': true
             }, 
             meshOrVox: 'mesh',
-            galleryImages: {
+            buildingObjects: {
 
             }
         }
@@ -122,11 +122,6 @@ class HouseTemplate extends Component {
         // const loader = new THREE.TextureLoader();
         // const bgTexture = loader.load(process.env.PUBLIC_URL + '/images/bg3.jpg'); 
         // scene.background = bgTexture;
-
-        // this.loadObj(`${process.env.PUBLIC_URL}/000041.obj`, `${process.env.PUBLIC_URL }/000041.png`, 5)
-        // this.loadObj(`${process.env.PUBLIC_URL}/000022.obj`, `${process.env.PUBLIC_URL }/000022.png`, 3)
-        // this.loadObj(`${process.env.PUBLIC_URL}/0000033.obj`, `${process.env.PUBLIC_URL }/0000033.png`, 4)
-        // this.loadObj(`${process.env.PUBLIC_URL}/0003753.obj`, `${process.env.PUBLIC_URL }/0003753.png`, 1)
       
         document.addEventListener('mousedown', this.onFurnitureClick, false);
 
@@ -325,12 +320,12 @@ class HouseTemplate extends Component {
       this.loadObj(galleryImage.mesh, galleryImage.texture, type)
       let iconDisplayState = this.state.iconDisplayState
       iconDisplayState[type] = false
-      const galleryImages = this.state
-      galleryImages[type] = galleryImage
+      const buildingObjects = this.state
+      buildingObjects[type] = galleryImage
       this.setState({
         iconDisplayState,
         modalIsOpen: false,
-        galleryImages
+        buildingObjects
       })
     }
 
@@ -494,7 +489,10 @@ class Item extends Component {
           <img src={gallery} /> 
         </div>
         case 'album':
-          return  <div className="selection" key={selection}>
+          return  this.props.type == 'human' ? <div className="human-album">
+            <img src={album} /> 
+            <input type="file" accept="image/*" onChange={toggleModal}/>  
+          </div> : <div className="selection" key={selection}>
             <img src={album} /> 
             <input type="file" accept="image/*" onChange={toggleModal}/>  
           </div>
@@ -625,33 +623,52 @@ class Item extends Component {
       formdata.append('file', imageData);
       formdata.append('category', _SUPER_CATEGORIES_3D[type]);
 
-      // const res = await fetch('/photos/basic-upload', {
-      //   method: 'post', 
-      //   body: formdata,
-      //   mode: 'no-cors',
-      //   headers:{
-      //     'Content-Type': 'multipart/form-data'
-      //   }, 
-      // })
+      try {
+        if (type != 'human') {
 
-      // const resJson = await res.json()
-      // console.log(resJson)
+          const res = await axios.post(
+            '/photos/basic-upload/',
+            formdata,
+            {
+                headers: {
+                    "Content-type": "multipart/form-data",
+                },                    
+            })
+            const {url_mesh, url_texture, url_vox, url_ldr} = res.data
+            this.props.parent.getChildrenMsg(type, {
+              mesh: url_mesh,
+              texture: url_texture,
+              vox: url_vox,
+              ldr: url_ldr
+            })
+            this.setState({
+              isOpen: false
+            })
 
-      axios.post(
-        '/photos/basic-upload/',
-        formdata,
-        {
-            headers: {
-                "Content-type": "multipart/form-data",
-            },                    
+        } else {
+          const res = await axios.post(
+            '/photos/reconstruction-upload/',
+            formdata,
+            {
+                headers: {
+                    "Content-type": "multipart/form-data",
+                },                    
+            })
+            const {url_mesh, url_texture, url_vox, url_ldr} = res.data
+            this.props.parent.getChildrenMsg(type, {
+              mesh: url_mesh,
+              texture: url_texture,
+              vox: url_vox,
+              ldr: url_ldr
+            })
+            this.setState({
+              isOpen: false
+            })
         }
-    )
-    .then(res => {
-        console.log(`Success` + res.data);
-    })
-    .catch(err => {
-        console.log(err);
-    })
+      } catch(err) {
+        console.log(err)
+      }
+        
     }
 
     displayModalContent = () => {
