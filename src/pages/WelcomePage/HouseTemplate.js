@@ -74,7 +74,7 @@ class HouseTemplate extends Component {
       buildingObjects: {
 
       },
-      wallColors: ['#EFD0D6', '#FBD460', '#78909C'],
+      wallColors: ['#FFFDE7', '#EFD0D6', '#FBD460', '#78909C'],
     }
   }
   componentDidMount() {
@@ -560,7 +560,7 @@ class Item extends Component {
   onChosenWallColor = (selection, wallPaper = 1) => async event => {
     event.preventDefault();
     const _objs = this.props.parent.state.objs
-    const wallMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color(this.props.parent.state.wallColors[wallPaper - 1]) });
+    const wallMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color(this.props.parent.state.wallColors[wallPaper]) });
     _objs['wall'].material = wallMaterial
     this.setState({
       isOpen: !this.state.isOpen,
@@ -595,6 +595,7 @@ class Item extends Component {
         return <div>
           <p className='wallpaper-text'>选择壁纸颜色</p>
           <div className='wall-selection-wrapper'>
+            <div className='wallpaper-color wallpaper-0' onClick={this.onChosenWallColor('wall', 0)}></div>
             <div className='wallpaper-color wallpaper-1' onClick={this.onChosenWallColor('wall', 1)}></div>
             <div className='wallpaper-color wallpaper-2' onClick={this.onChosenWallColor('wall', 2)}></div>
             <div className='wallpaper-color wallpaper-3' onClick={this.onChosenWallColor('wall', 3)}></div>
@@ -738,12 +739,12 @@ class Item extends Component {
               "Content-type": "multipart/form-data",
             },
           })
-        const { url_mesh, url_texture, url_vox, url_ldr } = res.data
+        const { url_mesh, url_texture, url_vox, url_ldr_with_stop } = res.data
         this.props.parent.getChildrenMsg(type, {
           mesh: url_mesh,
           texture: url_texture,
           vox: url_vox,
-          ldr: url_ldr
+          ldr: url_ldr_with_stop
         })
         this.setState({
           isOpen: false
