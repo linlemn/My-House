@@ -72,7 +72,7 @@ class HouseTemplate extends Component {
         'bookshelf': true
       },
       meshOrVox: 'mesh',
-      buildingObjects: {
+      buildingObjectUrls: {
 
       },
       wallColors: ['#FFFDE7', '#EFD0D6', '#FBD460', '#78909C'],
@@ -375,7 +375,7 @@ class HouseTemplate extends Component {
     this.setState({
       iconDisplayState,
       modalIsOpen: false,
-      buildingObjectUrls
+      buildingObjectUrls: buildingObjectUrls
     })
   }
     
