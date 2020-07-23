@@ -326,7 +326,10 @@ class HouseTemplate extends Component {
   }
 
   loadObj = (objUrl, mtlUrl, type) => {
-
+    if (type in this.state.objs) {
+      console.log(type, objUrl)
+      this.scene.remove(this.state.objs[type])
+    }
     const loader = new OBJLoader()
 
     loader.load(objUrl, geometry => {
@@ -364,7 +367,7 @@ class HouseTemplate extends Component {
   }
 
   getChildrenMsg = (type, galleryImage) => {
-    this.loadObj(galleryImage.mesh, galleryImage.texture, type)
+    this.loadObj(this.state.meshOrVox == 'mesh' ? galleryImage.mesh : galleryImage.voxsobj, galleryImage.texture, type)
     let iconDisplayState = this.state.iconDisplayState
     iconDisplayState[type] = false
     const {buildingObjectUrls} = this.state
@@ -386,6 +389,11 @@ class HouseTemplate extends Component {
       this.setState({
         meshOrVox: type
       })
+      for (let _type in this.state.buildingObjects) {
+        const obj = this.state.buildingObjects[_type]
+        console.log(obj.mesh, obj.voxsobj)
+        this.loadObj(type == 'mesh' ? obj.mesh : obj.voxsobj, obj.texture, _type)
+      }
     }
   }
 
@@ -683,8 +691,9 @@ class Item extends Component {
               alt: cat[j].style,
               mesh: cat[j].model,
               texture: cat[j].texture,
-              vox: cat[j].vox[0],
-              ldr: cat[j].ldr[0]
+              vox: cat[j].voxsobj[3],
+              ldr: cat[j].ldr[3],
+              voxsobj: cat[j].voxsobj[3]
             })
           }
         }
@@ -772,12 +781,14 @@ class Item extends Component {
               "Content-type": "multipart/form-data",
             },
           })
-        const { url_mesh, url_texture, url_vox, url_ldr_with_stop } = res.data
+        const { url_mesh, url_texture, url_vox, url_ldr_with_stop, url_voxsobj } = res.data
+        console.log(res.data)
         this.props.parent.getChildrenMsg(type, {
           mesh: url_mesh,
           texture: url_texture,
           vox: url_vox,
-          ldr: url_ldr_with_stop
+          ldr: url_ldr_with_stop,
+          voxsobj: url_voxsobj
         })
         this.setState({
           isOpen: false
@@ -792,12 +803,13 @@ class Item extends Component {
               "Content-type": "multipart/form-data",
             },
           })
-        const { url_mesh, url_texture, url_vox, url_ldr } = res.data
+        const { url_mesh, url_texture, url_vox, url_ldr, url_voxsobj } = res.data
         this.props.parent.getChildrenMsg(type, {
           mesh: url_mesh,
           texture: url_texture,
           vox: url_vox,
-          ldr: url_ldr
+          ldr: url_ldr,
+          voxsobj: url_voxsobj
         })
         this.setState({
           isOpen: false
