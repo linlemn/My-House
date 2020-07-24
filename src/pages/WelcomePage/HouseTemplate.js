@@ -13,6 +13,7 @@ import refresh from './icons/refresh.svg'
 import meshHouse from './icons/meshHouse.svg'
 import voxHouse from './icons/voxHouse.svg'
 import confirm from './icons/confirm.svg'
+import confirm_grey from './icons/confirm_grey.png'
 import wallPaper from './icons/wall.png'
 // import camera from './icons/camera.svg'
 
@@ -663,6 +664,7 @@ class Item extends Component {
       isOpen: false,
       loading: true,
       browsing: false,
+      confirm_disable: false,
       count: 0,
     };
   }
@@ -868,6 +870,18 @@ class Item extends Component {
   }
 
   onConfirmClick = async e => {
+
+    if (this.state.confirm_disable == true){
+      return
+    }
+
+    // 设置confirm icon disable
+    this.setState({
+      confirm_disable: true
+    })
+    var confirm_icon = document.getElementById('confirm-icon')
+    confirm_icon.src = confirm_grey
+
     e.preventDefault();
     const { selectedAlbumImage } = this.state
     const { type } = this.props
@@ -898,7 +912,7 @@ class Item extends Component {
           voxsobj: url_voxsobj
         })
         this.setState({
-          isOpen: false
+          isOpen: false,
         })
 
       } else {
@@ -925,6 +939,12 @@ class Item extends Component {
     } catch (err) {
       console.log(err)
     }
+
+    // 设置confirm icon 不 disable
+    this.setState({
+      confirm_disable: false
+    })
+    confirm_icon.src = confirm
 
   }
 
@@ -986,7 +1006,7 @@ class Item extends Component {
             className="album-image"
             browsing={browsing}
           />
-          <img src={confirm} className="confirm-icon" onClick={this.onConfirmClick} />
+          <img src={confirm} id="confirm-icon" className="confirm-icon" onClick={this.onConfirmClick} />
         </div>
       }
 
