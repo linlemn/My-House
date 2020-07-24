@@ -342,6 +342,8 @@ class HouseTemplate extends Component {
   }
 
   loadObj = (objUrl, mtlUrl, type) => {
+
+    console.log(mtlUrl)
     const oldObj = this.state.objs[type]
     if (type in this.state.objs) {
       console.log(type, objUrl)
@@ -359,10 +361,10 @@ class HouseTemplate extends Component {
       //   var scale = this.computeScale(oldObj);
       //   console.log(scale)
       //   geometry.scale.multiplyScalar(scale);
-      geometry.children[0].geometry.center()
+      // geometry.children[0].geometry.center()
       }
 
-      var material = new THREE.MeshLambertMaterial({ color: 0x5C3A21 });
+      var material = new THREE.MeshLambertMaterial();
 
       geometry.traverse(function (child) {
         if (child instanceof THREE.Mesh) {
@@ -419,7 +421,7 @@ class HouseTemplate extends Component {
     this.setState({
       iconDisplayState,
       modalIsOpen: false,
-      buildingObjectUrls: buildingObjectUrls
+      buildingObjectUrls
     })
   }
 
@@ -672,20 +674,30 @@ class HouseTemplate extends Component {
         this.state.objs[type].position.set(0, -1, -1.6)
       } else if (type == 'chair') {
         // chair
-        // this.state.objs[type].rotation.y = -1
-        // this.state.objs[type].rotation.x = -0.2
-        if (length > 0.5) {
-          this.state.objs[type].scale.x = 0.5;
-        }
-        if (width > 0.5) {
-          this.state.objs[type].scale.x = 0.5;
-        }
-        if (height > 0.5) {
-          this.state.objs[type].scale.x = 0.5;
-        }
-        this.state.objs[type].rotateY(-1)
+        this.state.objs[type].scale.set(lengthScale/1.5, lengthScale/1.5, lengthScale/1.5)
+        box = new THREE.Box3();
+        box.expandByObject(this.state.objs[type]);
+        length = box.max.x - box.min.x;
+        height = box.max.y - box.min.y;
+        width = box.max.z - box.min.z;
+        console.log("vox after scaling", length, height, width)
+        this.state.objs[type].rotateX(-Math.PI / 2)
+        this.state.objs[type].rotateZ(Math.PI)
+        this.state.objs[type].rotateY(-3 * Math.PI / 2)
+        this.state.objs[type].position.set(1.8, -0.5, -0.5)
+        // this.state.objs[type].applyMatrix4(m)
+        // if (length > 0.5) {
+        //   this.state.objs[type].scale.x = 0.5;
+        // }
+        // if (width > 0.5) {
+        //   this.state.objs[type].scale.x = 0.5;
+        // }
+        // if (height > 0.5) {
+        //   this.state.objs[type].scale.x = 0.5;
+        // }
+        this.state.objs[type].rotateX(1)
         // this.state.objs[type].rotateX(0.1)
-        this.state.objs[type].position.set(1.5, -1, -0.1)
+        // this.state.objs[type].position.set(1.5, -1, -0.1)
       } else if (type == 'table') {
         // this.state.objs[4].rotation.y = -1
         this.state.objs[type].rotateX(-0.2)
