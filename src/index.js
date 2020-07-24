@@ -7,13 +7,15 @@ import HouseTemplate from './pages/WelcomePage/HouseTemplate'
 import WelcomePage from './pages/WelcomePage/WelcomePage'
 import SelectRoom from './pages/WelcomePage/SelectRoom'
 import * as serviceWorker from './serviceWorker';
+import {UserAgentProvider, UserAgent} from '@quentin-sommer/react-useragent'
 
 
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 
 ReactDOM.render(
-  // <React.StrictMode>
-  <div>
+  <UserAgentProvider ua={window.navigator.userAgent}>
+    <UserAgent mobile>
+    <div className="forced-landscape">
     <Router>
       <TransitionGroup>
         <CSSTransition
@@ -42,10 +44,53 @@ ReactDOM.render(
           </Switch></CSSTransition>
       </TransitionGroup></Router>
   </div>
+    </UserAgent>
+  </UserAgentProvider>
+  // <React.StrictMode>
   //  </React.StrictMode>
   ,
   document.getElementById('root')
 );
+
+// var width = document.documentElement.clientWidth;
+// var height =  document.documentElement.clientHeight;
+// if( width < height ){
+//     console.log(width + " " + height);
+//     const page =  document.querySelector('.forced-landscape');
+//     console.log(page)
+//     page.style.width = height;
+//     page.style.height = width;
+//     page.style.top = height-width/2 ;
+//     page.style.left = 0-(height-width)/2 ;
+//     // page.style.transform = 'rotate(90deg)';
+//     // page.style.transformOrigin='50% 50%';
+// } 
+
+// var evt = "onorientationchange" in window ? "orientationchange" : "resize";
+      
+// window.addEventListener(evt, function() {
+//     var width = document.documentElement.clientWidth;
+//      var height =  document.documentElement.clientHeight;
+//      const page =  document.querySelector('.forced-landscape');
+//      if( width > height ){
+       
+//         page.style.width = width ;
+//         page.style.height = height;
+//         page.style.top = 0;
+//         page.style.left =  0;
+//         page.style.transform='none';
+//         page.style.transformOrigin = '50% 50%';
+//      }
+//      else{
+//         page.style.width = height ;
+//         page.style.height = width;
+//         page.style.top = (height-width)/2;
+//         page.style.left =  0-(height-width)/2;
+//         page.style.transform='rotate(90deg)';
+//         page.style.transformOrigin = '50% 50%';
+//      }
+    
+// }, false);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

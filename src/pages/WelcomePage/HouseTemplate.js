@@ -77,7 +77,8 @@ class HouseTemplate extends Component {
       buildingObjectUrls: {
 
       },
-      wallColors: ['#FFFDE7', '#EFD0D6', '#A1887F', '#78909C'],
+      wallColors: ['#FFFDE7', '#EFD0D6', '#FBD460', '#78909C'],
+      isReselectOpen: false,
     }
   }
 
@@ -109,7 +110,7 @@ class HouseTemplate extends Component {
         scene.add(light2);
 
         scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
-      
+
         document.addEventListener('mousedown', this.onFurnitureClick, false);
 
         this.createRoom()
@@ -119,59 +120,59 @@ class HouseTemplate extends Component {
         // this.loadObj(`${process.env.PUBLIC_URL}/0000008.obj`, `${process.env.PUBLIC_URL}/0000033.png`, 'obj')
     }
 
-    loadModel = () => {
-      // iconDisplayState
-      const iconDisplayStateRecord = window.sessionStorage.getItem('iconDisplayState')
-      if (iconDisplayStateRecord) {
-        let ids = {
-          'sofa': true,
-          'table': true,
-          'human': true,
-          'chair': true,
-          'bookshelf': true
-        }
-        let bourls = {}
-        const idsrArr = iconDisplayStateRecord.split('?')
-        for (let state in idsrArr) {
-          if (!idsrArr[state])
-            continue
-          const splitArr = idsrArr[state].split(':')
-          const type = splitArr[0]
-          console.log(splitArr, idsrArr, type)
-          ids[type] = splitArr[1] == 'false' ? false : true
-          const objRecord = window.sessionStorage.getItem(type)
-          if (objRecord) {
-            const objRecordSplitArr = objRecord.split('?')
-            let urls = {}
-            for (let url in objRecordSplitArr) 
-              urls[objRecordSplitArr[url].split(':')[0]] = objRecordSplitArr[url].split(':')[1]
-            bourls[type] = urls
-            this.loadObj(urls.mesh, urls.texture, type)
-          }
-        }
-        console.log(ids)
-
-        this.setState({
-          iconDisplayState: ids,
-          buildingObjectUrls: bourls
-        })
+  loadModel = () => {
+    // iconDisplayState
+    const iconDisplayStateRecord = window.sessionStorage.getItem('iconDisplayState')
+    if (iconDisplayStateRecord) {
+      let ids = {
+        'sofa': true,
+        'table': true,
+        'human': true,
+        'chair': true,
+        'bookshelf': true
       }
-      
+      let bourls = {}
+      const idsrArr = iconDisplayStateRecord.split('?')
+      for (let state in idsrArr) {
+        if (!idsrArr[state])
+          continue
+        const splitArr = idsrArr[state].split(':')
+        const type = splitArr[0]
+        console.log(splitArr, idsrArr, type)
+        ids[type] = splitArr[1] == 'false' ? false : true
+        const objRecord = window.sessionStorage.getItem(type)
+        if (objRecord) {
+          const objRecordSplitArr = objRecord.split('?')
+          let urls = {}
+          for (let url in objRecordSplitArr)
+            urls[objRecordSplitArr[url].split(':')[0]] = objRecordSplitArr[url].split(':')[1]
+          bourls[type] = urls
+          this.loadObj(urls.mesh, urls.texture, type)
+        }
+      }
+      console.log(ids)
+
+      this.setState({
+        iconDisplayState: ids,
+        buildingObjectUrls: bourls
+      })
     }
 
-    createRoundRect = (x, y, width, height, radius) => {
-        const shape = new THREE.Shape()
-        shape.moveTo( x, y + radius );
-        shape.lineTo( x, y + height - radius );
-        shape.quadraticCurveTo( x, y + height, x + radius, y + height );
-        shape.lineTo( x + width - radius, y + height) ;
-        shape.quadraticCurveTo( x + width, y + height, x + width, y + height - radius );
-        shape.lineTo( x + width, y + radius );
-        shape.quadraticCurveTo( x + width, y, x + width - radius, y );
-        shape.lineTo( x + radius, y );
-        shape.quadraticCurveTo( x, y, x, y + radius );
-        return shape
-    }
+  }
+
+  createRoundRect = (x, y, width, height, radius) => {
+    const shape = new THREE.Shape()
+    shape.moveTo(x, y + radius);
+    shape.lineTo(x, y + height - radius);
+    shape.quadraticCurveTo(x, y + height, x + radius, y + height);
+    shape.lineTo(x + width - radius, y + height);
+    shape.quadraticCurveTo(x + width, y + height, x + width, y + height - radius);
+    shape.lineTo(x + width, y + radius);
+    shape.quadraticCurveTo(x + width, y, x + width - radius, y);
+    shape.lineTo(x + radius, y);
+    shape.quadraticCurveTo(x, y, x, y + radius);
+    return shape
+  }
 
   createIcon = () => {
     const geom1 = new THREE.CircleGeometry(0.3, 360)
@@ -296,13 +297,21 @@ class HouseTemplate extends Component {
   }
 
   toggleModal = (id, event) => {
-    event.preventDefault();
+    // event.preventDefault();
+    event.stopPropagation();
     if (id == 'wall') {
       this.setState({
         wallModalIsOpen: !this.state.wallModalIsOpen,
         loading: true
       })
-    } else {
+    } 
+    else if (id == 'reselect') {
+      this.setState({
+        isReselectOpen: false,
+        loading: true,
+      });
+    }
+    else {
       this.setState({
         modalIsOpen: !this.state.modalIsOpen,
         loading: true,
@@ -310,8 +319,8 @@ class HouseTemplate extends Component {
       });
     }
   }
-    
-    handleOnAfterOpenModal = () => {
+
+  handleOnAfterOpenModal = () => {
     // when ready, we can access the available refs.
     (new Promise((resolve, reject) => {
       setTimeout(() => resolve(true), 500);
@@ -333,6 +342,7 @@ class HouseTemplate extends Component {
   }
 
   loadObj = (objUrl, mtlUrl, type) => {
+    const oldObj = this.state.objs[type]
     if (type in this.state.objs) {
       console.log(type, objUrl)
       this.scene.remove(this.state.objs[type])
@@ -345,6 +355,12 @@ class HouseTemplate extends Component {
     }
 
     loader.load(objUrl, geometry => {
+      // if (this.state.meshOrVox == 'vox') {
+      //   var scale = this.computeScale(oldObj);
+      //   console.log(scale)
+      //   geometry.scale.multiplyScalar(scale);
+      // }
+
       var material = new THREE.MeshLambertMaterial({ color: 0x5C3A21 });
 
       geometry.traverse(function (child) {
@@ -370,24 +386,26 @@ class HouseTemplate extends Component {
       let wrapper = new THREE.Object3D();
       wrapper.add(geometry)
 
-      const light3 = new THREE.SpotLight(0xffffff, 2.5);
+      const light3 = new THREE.SpotLight(0xffffff, 1);
       light3.position.set(-1, -0.3, 1.5);
       light3.target = wrapper;
       light3.angle = Math.PI/10;
       light3.distance = 3;
       this.scene.add(light3);
 
+      geometry.name = type
+
       const objs = this.state.objs
+      if (objs[type]) {
+        this.scene.remove(objs[type])
+      }
       objs[type] = wrapper
       this.setState({
         objs
       })
       this.placeFurniture(type)
-      geometry.name = type
       this.scene.add(wrapper);
     });
-
-    
       
   }
 
@@ -395,7 +413,7 @@ class HouseTemplate extends Component {
     this.loadObj(this.state.meshOrVox == 'mesh' ? galleryImage.mesh : galleryImage.voxsobj, galleryImage.texture, type)
     let iconDisplayState = this.state.iconDisplayState
     iconDisplayState[type] = false
-    const {buildingObjectUrls} = this.state
+    const { buildingObjectUrls } = this.state
     buildingObjectUrls[type] = galleryImage
     this.setState({
       iconDisplayState,
@@ -403,7 +421,7 @@ class HouseTemplate extends Component {
       buildingObjectUrls: buildingObjectUrls
     })
   }
-    
+
 
   onHouseTypeIconClick = type => {
     if (type == 'wall') {
@@ -424,6 +442,7 @@ class HouseTemplate extends Component {
 
   onFurnitureClick = event => {
     event.preventDefault();
+    event.stopPropagation();
     let objects = [];
     const raycaster = new THREE.Raycaster();
     let mouse = new THREE.Vector2();
@@ -438,31 +457,51 @@ class HouseTemplate extends Component {
         objects.push(child)
       }
 
-      const {iconDisplayState, buildingObjectUrls} = this.state
+      const { iconDisplayState, buildingObjectUrls } = this.state
       for (let type in this.state.objs) {
         if (type !== 'wall') {
           const object = this.state.objs[type]
           let intersects = raycaster.intersectObject(object, true);
           if (intersects.length > 0) {
-            // 跳转前记录
-          let iconDisplayStateRecord = ''
-          for (let t in buildingObjectUrls) {
-            if (buildingObjectUrls[t]) {
-              window.sessionStorage.setItem(t, `mesh:${buildingObjectUrls[t].mesh}?texture:${buildingObjectUrls[t].texture}?ldr:${buildingObjectUrls[t].ldr}?vox:${buildingObjectUrls[t].obj}`)
-              iconDisplayStateRecord += `${t}:${iconDisplayState[t]}?`
-            }
-          }
-            // type是字符串
-            const ldr = this.state.buildingObjectUrls[type].ldr.split('/').pop()
-            window.location.href = (`http://103.79.27.148:8081/?model=${ldr}`)
+            this.setState({
+              isReselectOpen: true,
+              clickFurnitureType: type,
+              clickType: type,
+            })
           }
         }
       }
     }, false)
   }
 
+  toInstruction = event => {
+    event.stopPropagation()
+    const {iconDisplayState, buildingObjectUrls, clickFurnitureType} = this.state
+    // 跳转前记录
+    let iconDisplayStateRecord = ''
+    for (let t in buildingObjectUrls) {
+      if (buildingObjectUrls[t]) {
+        window.sessionStorage.setItem(t, `mesh:${buildingObjectUrls[t].mesh}?texture:${buildingObjectUrls[t].texture}?ldr:${buildingObjectUrls[t].ldr}?vox:${buildingObjectUrls[t].obj}`)
+        iconDisplayStateRecord += `${t}:${iconDisplayState[t]}?`
+      }
+    }
+    window.sessionStorage.setItem('iconDisplayState', iconDisplayStateRecord)
+      // type是字符串
+      const ldr = this.state.buildingObjectUrls[clickFurnitureType].ldr.split('/').pop()
+      window.location.href = (`http://103.79.27.148:8081/?model=${ldr}`)
+  }
+
+  onReselectionClick = event => {
+    event.stopPropagation()
+    // 获取点击的类型，
+    this.setState({
+      isReselectOpen: !this.state.isReselectOpen,
+      modalIsOpen: !this.state.modalIsOpen
+    })
+  }
+
   render() {
-    const { modalIsOpen, wallModalIsOpen, items, loading, clickType, iconDisplayState, meshOrVox } = this.state
+    const { modalIsOpen, wallModalIsOpen, items, loading, clickType, iconDisplayState, meshOrVox, isReselectOpen } = this.state
     return (
       <div
         className="canvas"
@@ -545,32 +584,90 @@ class HouseTemplate extends Component {
             }
           </div>
         </Modal>
+        <Modal
+          closeTimeoutMS={150}
+          isOpen={isReselectOpen}
+          onRequestClose={e => { this.toggleModal('reselect', e) }}
+          ariaHideApp={false}
+          onAfterOpen={this.handleOnAfterOpenModal}
+          style={{
+            content: {
+              position: 'absolute',
+              top: '20%',
+              left: '30%',
+              right: '30%',
+              bottom: '20%',
+              backgroundColor: 'rgba(255, 255, 255)',
+              border: 'None',
+              boxShadow: '5px 5px 10px rgba(0,0,0,0.25)',
+              borderRadius: '10%',
+              padding: '35px',
+            }
+          }}
+        >
+          <div className="reselect-images-wrapper">
+          <div className="reselect-image-wrapper" onClick={e => {
+            this.toInstruction(e)
+          }}>
+            <div className="reselect-style-text">{'LEGO Instruction'}</div>
+          </div>
+          <div className="reselect-image-wrapper" onClick={e => {
+            this.onReselectionClick(e)
+          }}>
+            <div className="reselect-style-text">{'Reselect'}</div>
+          </div>
+          
+        </div>
+        </Modal>
       </div>
     );
   }
+
+  computeScale(geometry) {
+    var box = new THREE.Box3();
+    box.expandByObject(geometry);
+    var maxX = box.max.x;
+    var minX = box.min.x;
+    var maxY = box.max.y;
+    var minY = box.min.y;
+    var maxZ = box.max.z;
+    var minZ = box.min.z;
+    var maxDis = Math.sqrt((maxX - minX) * (maxX - minX) + (maxY - minY) * (maxY - minY) + (maxZ - minZ) * (maxZ - minZ)) / 2;
+    var scale = 1.0 / maxDis;
+    return scale;
+}
 
   placeFurniture(type) {
     var box = new THREE.Box3();
     box.expandByObject(this.state.objs[type]);
     var length = box.max.x - box.min.x;
-    var width = box.max.z - box.min.z;
     var height = box.max.y - box.min.y;
-    console.log(length, width, height)
+    var width = box.max.z - box.min.z;
+    console.log("before scaling", length, height, width)
+    var m = new THREE.Matrix4();
+    var vec = new THREE.Vector3(1, 0, 0);
+    m.set(1 - 2 * vec.x * vec.x, -2 * vec.x * vec.y, -2 * vec.x * vec.z, 0,
+      -2 * vec.x * vec.y, 1 - 2 * vec.y * vec.y, -2 * vec.y * vec.z, 0,
+      -2 * vec.x * vec.z, -2 * vec.y * vec.z, 1 - 2 * vec.z * vec.z, 0,
+      0, 0, 0, 1);
     if (this.state.meshOrVox == 'vox') {
-      this.state.objs[type].scale.set(0.025, 0.025, 0.025);
-      // this.state.objs[type].rotateZ(1.6)
-      // this.state.objs[type].rotateY(-3.2)
-      // this.state.objs[type].rotateX(-0.1)
+      const { buildingObjectUrls } = this.state
+      const lengthScale = buildingObjectUrls[type].size[0] / length
+      const heightScale = buildingObjectUrls[type].size[1] / height
+      const widthScale = buildingObjectUrls[type].size[2] / width
       if (type == 'sofa') {
-        // if (length > 2.4 && length < 3.5) {
-        //   this.state.objs[type].scale.set(0.8, 0.8, 0.6);
-        // } else if (length >= 3.3) {
-        //   this.state.objs[type].scale.set(0.6, 0.6, 0.45)
-        // }
-        this.state.objs[type].scale.set(0.05, 0.05, 0.05);
-        this.state.objs[type].rotateZ(-Math.PI)
-        this.state.objs[type].rotateY(-3*Math.PI/2)
-        this.state.objs[type].position.set(0, -0.5, -1.3)
+        this.state.objs[type].scale.set(lengthScale, lengthScale, lengthScale)
+        box = new THREE.Box3();
+        box.expandByObject(this.state.objs[type]);
+        length = box.max.x - box.min.x;
+        height = box.max.y - box.min.y;
+        width = box.max.z - box.min.z;
+        console.log("vox after scaling", length, height, width)
+        this.state.objs[type].rotateX(-Math.PI / 2)
+        this.state.objs[type].rotateZ(Math.PI)
+        this.state.objs[type].rotateY(-3 * Math.PI / 2)
+        this.state.objs[type].position.set(0, -1, -2)
+        this.state.objs[type].applyMatrix4(m)
       } else if (type == 'chair') {
         // chair
         // this.state.objs[type].rotation.y = -1
@@ -594,7 +691,7 @@ class HouseTemplate extends Component {
         if (length > 1.9) {
           // this.state.objs[type].scale.set(0.6, 0.5, 0.5);
           this.state.objs[type].scale.x = 0.5
-        } 
+        }
         if (height > 0.9 && height < 1.5) {
           this.state.objs[type].scale.y = 0.5
         } else if (height >= 1.5) {
@@ -607,7 +704,7 @@ class HouseTemplate extends Component {
       } else if (type == 'bookshelf') {
         this.state.objs[type].scale.set(0.05, 0.05, 0.05);
         // this.state.objs[type].rotateY(-Math.PI/2)
-        this.state.objs[type].rotateZ(Math.PI/2)
+        this.state.objs[type].rotateZ(Math.PI / 2)
         // this.state.objs[type].rotateX(Math.PI)
         this.state.objs[type].position.set(0, -1, -1)
       } else if (type == 'human') {
@@ -646,7 +743,7 @@ class HouseTemplate extends Component {
         if (length > 1.9) {
           // this.state.objs[type].scale.set(0.6, 0.5, 0.5);
           this.state.objs[type].scale.x = 0.5
-        } 
+        }
         if (height > 0.9 && height < 1.5) {
           this.state.objs[type].scale.y = 0.5
         } else if (height >= 1.5) {
@@ -662,13 +759,24 @@ class HouseTemplate extends Component {
         } else {
           this.state.objs[type].scale.set(0.7, 0.7, 0.7);
         }
-        this.state.objs[type].rotateY(Math.PI/2)
+        this.state.objs[type].rotateY(Math.PI / 2)
         this.state.objs[type].position.set(-1.8, -1, -0.2)
       } else if (type == 'human') {
         this.state.objs[type].scale.set(0.7, 0.8, 0.7)
         this.state.objs[type].position.set(-1, -0.3, 0)
 
       }
+      const { buildingObjectUrls } = this.state
+      box = new THREE.Box3();
+      box.expandByObject(this.state.objs[type]);
+      length = box.max.x - box.min.x;
+      height = box.max.y - box.min.y;
+      width = box.max.z - box.min.z;
+      console.log("after scaling", length, height, width)
+      buildingObjectUrls[type].size = [length, height, width]
+      this.setState({
+        buildingObjectUrls: buildingObjectUrls
+      })
     }
   }
 }
@@ -689,7 +797,8 @@ class Item extends Component {
   toggleModal = (selection, wallPaper = 1) => async event => {
     if (selection === 'wall') {
       console.log(selection)
-      event.preventDefault();
+      // event.preventDefault();
+      event.stopPropagation();
       const _objs = this.props.parent.state.objs
       const wallMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color(this.props.parent.state.wallColors[wallPaper - 1]) });
       _objs['wall'].material = wallMaterial
@@ -725,7 +834,8 @@ class Item extends Component {
   };
 
   onChosenWallColor = (selection, wallPaper = 1) => async event => {
-    event.preventDefault();
+    // event.preventDefault();
+    event.stopPropagation();
     const _objs = this.props.parent.state.objs
     const wallMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color(this.props.parent.state.wallColors[wallPaper]) });
     _objs['wall'].material = wallMaterial
@@ -738,17 +848,17 @@ class Item extends Component {
     })
   }
 
-    displaySelection = selection => {
-      const toggleModal = this.toggleModal(selection);
-      switch (selection) {
-        // case 'camera':
-        //   return <div className="selection" key={selection}>
-        //   <img src={camera} /> 
-        //   <input type="file" accept="image/*" capture="camera" />  
-        // </div>
-        case 'gallery':
-          return <div className="selection" key={selection} onTouchStart={toggleModal}>
-          <img src={gallery} /> 
+  displaySelection = selection => {
+    const toggleModal = this.toggleModal(selection);
+    switch (selection) {
+      // case 'camera':
+      //   return <div className="selection" key={selection}>
+      //   <img src={camera} /> 
+      //   <input type="file" accept="image/*" capture="camera" />  
+      // </div>
+      case 'gallery':
+        return <div className="selection" key={selection} onTouchStart={toggleModal}>
+          <img src={gallery} />
         </div>
       case 'album':
         return this.props.type == 'human' ? <div className="human-album">
@@ -888,6 +998,8 @@ class Item extends Component {
 
   onConfirmClick = async e => {
 
+    e.preventDefault();
+
     if (this.state.confirm_disable == true){
       return
     }
@@ -899,7 +1011,6 @@ class Item extends Component {
     var confirm_icon = document.getElementById('confirm-icon')
     confirm_icon.src = confirm_grey
 
-    e.preventDefault();
     const { selectedAlbumImage } = this.state
     const { type } = this.props
     let formdata = new FormData();
