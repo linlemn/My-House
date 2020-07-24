@@ -470,12 +470,12 @@ class HouseTemplate extends Component {
         objects.push(child)
       }
 
-      const { modalIsOpen } = this.state
+      const { modalIsOpen, wallModalIsOpen } = this.state
       for (let type in this.state.objs) {
         if (type !== 'wall') {
           const object = this.state.objs[type]
           let intersects = raycaster.intersectObject(object, true);
-          if (intersects.length > 0 && !modalIsOpen) {
+          if (intersects.length > 0 && !modalIsOpen && !wallModalIsOpen) {
             this.setState({
               isReselectOpen: true,
               clickFurnitureType: type,
@@ -562,11 +562,11 @@ class HouseTemplate extends Component {
             this.onHouseTypeIconClick('vox')
           }}></img>
         </div>
-        {iconDisplayState['sofa'] && <img className="icon sofa" id="sofa" src={sofa} onClick={e => { this.toggleModal('sofa', e) }} />}
-        {iconDisplayState['table'] && <img className="icon table" id="table" src={table} onClick={e => { this.toggleModal('table', e) }} />}
-        {iconDisplayState['chair'] && <img className="icon chair" id="chair" src={chair} onClick={e => { this.toggleModal('chair', e) }} />}
-        {iconDisplayState['human'] && <img className="icon human" id="human" src={human} onClick={e => { this.toggleModal('human', e) }} />}
-        {iconDisplayState['bookshelf'] && <img className="icon bookshelf" id="bookshelf" src={bookshelf} onClick={e => { this.toggleModal('bookshelf', e) }} />}
+        {iconDisplayState['sofa'] && <img className="icon sofa" id="sofa" src={sofa} onMouseDown={e => { this.toggleModal('sofa', e) }} />}
+        {iconDisplayState['table'] && <img className="icon table" id="table" src={table} onMouseDown={e => { this.toggleModal('table', e) }} />}
+        {iconDisplayState['chair'] && <img className="icon chair" id="chair" src={chair} onMouseDown={e => { this.toggleModal('chair', e) }} />}
+        {iconDisplayState['human'] && <img className="icon human" id="human" src={human} onMouseDown={e => { this.toggleModal('human', e) }} />}
+        {iconDisplayState['bookshelf'] && <img className="icon bookshelf" id="bookshelf" src={bookshelf} onMouseDown={e => { this.toggleModal('bookshelf', e) }} />}
         <Modal
           closeTimeoutMS={150}
           contentLabel="modalA"
