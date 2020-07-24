@@ -445,17 +445,11 @@ class HouseTemplate extends Component {
           const object = this.state.objs[type]
           let intersects = raycaster.intersectObject(object, true);
           if (intersects.length > 0) {
-            // 跳转前记录
-            let iconDisplayStateRecord = ''
-            for (let t in buildingObjectUrls) {
-              if (buildingObjectUrls[t]) {
-                window.sessionStorage.setItem(t, `mesh:${buildingObjectUrls[t].mesh}?texture:${buildingObjectUrls[t].texture}?ldr:${buildingObjectUrls[t].ldr}?vox:${buildingObjectUrls[t].obj}`)
-                iconDisplayStateRecord += `${t}:${iconDisplayState[t]}?`
-              }
-            }
-            // type是字符串
-            const ldr = this.state.buildingObjectUrls[type].ldr.split('/').pop()
-            window.location.href = (`http://103.79.27.148:8081/?model=${ldr}`)
+            this.setState({
+              isReselectOpen: true,
+              clickFurnitureType: type,
+              clickType: type,
+            })
           }
         }
       }
