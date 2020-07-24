@@ -716,7 +716,7 @@ class HouseTemplate extends Component {
       } else if (type == 'bookshelf') {
 
         // bookshelf
-        this.state.objs[type].scale.set(lengthScale, lengthScale, lengthScale)
+        this.state.objs[type].scale.set(lengthScale, widthScale, lengthScale)
         box = new THREE.Box3();
         box.expandByObject(this.state.objs[type]);
         length = box.max.x - box.min.x;
