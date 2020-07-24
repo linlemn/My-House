@@ -75,7 +75,7 @@ class HouseTemplate extends Component {
       buildingObjectUrls: {
 
       },
-      wallColors: ['#FFFDE7', '#EFD0D6', '#FBD460', '#78909C'],
+      wallColors: ['#FFFDE7', '#EFD0D6', '#A1887F', '#78909C'],
     }
   }
 
@@ -102,6 +102,10 @@ class HouseTemplate extends Component {
         light1.position.set(0, 7, 4);
         scene.add(light1);
 
+        const light2 = new THREE.SpotLight(0xffffff, 0.12);
+        light2.position.set(0, 0, 50);
+        scene.add(light2);
+
         scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
       
         document.addEventListener('mousedown', this.onFurnitureClick, false);
@@ -110,6 +114,7 @@ class HouseTemplate extends Component {
         // this.createIcon()
         this.loadModel()
         this.animate()
+        // this.loadObj(`${process.env.PUBLIC_URL}/0000008.obj`, `${process.env.PUBLIC_URL}/0000033.png`, 'obj')
     }
 
     loadModel = () => {
@@ -352,14 +357,16 @@ class HouseTemplate extends Component {
       });
 
       //  geometry.rotation.x = -2;
+      let wrapper = new THREE.Object3D();
+      wrapper.add(geometry)
       const objs = this.state.objs
-      objs[type] = geometry
+      objs[type] = wrapper
       this.setState({
         objs
       })
       this.placeFurniture(type)
       geometry.name = type
-      this.scene.add(geometry);
+      this.scene.add(wrapper);
     });
 
     
@@ -389,8 +396,8 @@ class HouseTemplate extends Component {
       this.setState({
         meshOrVox: type
       })
-      for (let _type in this.state.buildingObjects) {
-        const obj = this.state.buildingObjects[_type]
+      for (let _type in this.state.buildingObjectUrls) {
+        const obj = this.state.buildingObjectUrls[_type]
         console.log(obj.mesh, obj.voxsobj)
         this.loadObj(type == 'mesh' ? obj.mesh : obj.voxsobj, obj.texture, _type)
       }
@@ -525,25 +532,125 @@ class HouseTemplate extends Component {
   }
 
   placeFurniture(type) {
-    this.state.objs[type].scale.set(0.8, 0.8, 0.8);
-    if (type == 'sofa') {
-      this.state.objs[type].scale.set(0.7, 0.7, 0.7);
-      this.state.objs[type].rotation.x = -0.1
-      this.state.objs[type].position.set(0, -1, -0.6)
-    } else if (type == 'chair') {
-      // chair
-      // this.state.objs[3].rotation.y = -1
-      // this.state.objs[3].rotation.x = -0.2
-      this.state.objs[type].position.set(1.5, -1, -0.2)
-    } else if (type == 'table') {
-      // this.state.objs[4].rotation.y = -1
-      this.state.objs[type].rotation.x = -0.2
-      this.state.objs[type].position.set(0, -1, 0)
-      this.state.objs[type].scale.set(0.7, 0.7, 0.7);
-    } else if (type == 'bookshelf') {
-      // this.state.objs[cat].scale.set(0.7, 0.7, 0.7);
-      this.state.objs[type].rotation.y = 1.8
-      this.state.objs[type].position.set(-1.8, -1, -0.2)
+    var box = new THREE.Box3();
+    box.expandByObject(this.state.objs[type]);
+    var length = box.max.x - box.min.x;
+    var width = box.max.z - box.min.z;
+    var height = box.max.y - box.min.y;
+    console.log(length, width, height)
+    if (this.state.meshOrVox == 'vox') {
+      this.state.objs[type].scale.set(0.025, 0.025, 0.025);
+      // this.state.objs[type].rotateZ(1.6)
+      // this.state.objs[type].rotateY(-3.2)
+      // this.state.objs[type].rotateX(-0.1)
+      if (type == 'sofa') {
+        // if (length > 2.4 && length < 3.5) {
+        //   this.state.objs[type].scale.set(0.8, 0.8, 0.6);
+        // } else if (length >= 3.3) {
+        //   this.state.objs[type].scale.set(0.6, 0.6, 0.45)
+        // }
+        this.state.objs[type].scale.set(0.05, 0.05, 0.05);
+        this.state.objs[type].rotateZ(-Math.PI)
+        this.state.objs[type].rotateY(-3*Math.PI/2)
+        this.state.objs[type].position.set(0, -0.5, -1.3)
+      } else if (type == 'chair') {
+        // chair
+        // this.state.objs[type].rotation.y = -1
+        // this.state.objs[type].rotation.x = -0.2
+        if (length > 0.5) {
+          this.state.objs[type].scale.x = 0.5;
+        }
+        if (width > 0.5) {
+          this.state.objs[type].scale.x = 0.5;
+        }
+        if (height > 0.5) {
+          this.state.objs[type].scale.x = 0.5;
+        }
+        this.state.objs[type].rotateY(-1)
+        // this.state.objs[type].rotateX(0.1)
+        this.state.objs[type].position.set(1.5, -1, -0.1)
+      } else if (type == 'table') {
+        // this.state.objs[4].rotation.y = -1
+        this.state.objs[type].rotateX(-0.2)
+        this.state.objs[type].position.set(0, -1, 0)
+        if (length > 1.9) {
+          // this.state.objs[type].scale.set(0.6, 0.5, 0.5);
+          this.state.objs[type].scale.x = 0.5
+        } 
+        if (height > 0.9 && height < 1.5) {
+          this.state.objs[type].scale.y = 0.5
+        } else if (height >= 1.5) {
+          this.state.objs[type].scale.y = 0.3
+        }
+        if (width > 0.6) {
+          this.state.objs[type].scale.z = 0.3
+        }
+        // this.state.objs[type].scale.set(0.7, 0.7, 0.7);
+      } else if (type == 'bookshelf') {
+        this.state.objs[type].scale.set(0.05, 0.05, 0.05);
+        // this.state.objs[type].rotateY(-Math.PI/2)
+        this.state.objs[type].rotateZ(Math.PI/2)
+        // this.state.objs[type].rotateX(Math.PI)
+        this.state.objs[type].position.set(0, -1, -1)
+      } else if (type == 'human') {
+        this.state.objs[type].scale.set(0.7, 0.8, 0.7)
+        this.state.objs[type].position.set(-1, -0.3, 0)
+      }
+    } else {
+      if (type == 'sofa') {
+        if (length > 2.4 && length < 3.5) {
+          this.state.objs[type].scale.set(0.8, 0.8, 0.6);
+        } else if (length >= 3.3) {
+          this.state.objs[type].scale.set(0.6, 0.6, 0.45)
+        }
+        // this.state.objs[type].rotation.x = -0.1
+        this.state.objs[type].position.set(0, -1, -0.6)
+      } else if (type == 'chair') {
+        // chair
+        // this.state.objs[type].rotation.y = -1
+        // this.state.objs[type].rotation.x = -0.2
+        if (length > 0.5) {
+          this.state.objs[type].scale.x = 0.5;
+        }
+        if (width > 0.5) {
+          this.state.objs[type].scale.x = 0.5;
+        }
+        if (height > 0.5) {
+          this.state.objs[type].scale.x = 0.5;
+        }
+        this.state.objs[type].rotateY(-1)
+        // this.state.objs[type].rotateX(0.1)
+        this.state.objs[type].position.set(1.5, -1, -0.1)
+      } else if (type == 'table') {
+        // this.state.objs[4].rotation.y = -1
+        this.state.objs[type].rotateX(-0.2)
+        this.state.objs[type].position.set(0, -1, 0)
+        if (length > 1.9) {
+          // this.state.objs[type].scale.set(0.6, 0.5, 0.5);
+          this.state.objs[type].scale.x = 0.5
+        } 
+        if (height > 0.9 && height < 1.5) {
+          this.state.objs[type].scale.y = 0.5
+        } else if (height >= 1.5) {
+          this.state.objs[type].scale.y = 0.3
+        }
+        if (width > 0.6) {
+          this.state.objs[type].scale.z = 0.3
+        }
+        // this.state.objs[type].scale.set(0.7, 0.7, 0.7);
+      } else if (type == 'bookshelf') {
+        if (length > 1.5) {
+          this.state.objs[type].scale.set(0.3, 0.7, 0.7);
+        } else {
+          this.state.objs[type].scale.set(0.7, 0.7, 0.7);
+        }
+        this.state.objs[type].rotateY(Math.PI/2)
+        this.state.objs[type].position.set(-1.8, -1, -0.2)
+      } else if (type == 'human') {
+        this.state.objs[type].scale.set(0.7, 0.8, 0.7)
+        this.state.objs[type].position.set(-1, -0.3, 0)
+
+      }
     }
   }
 }
@@ -691,9 +798,9 @@ class Item extends Component {
               alt: cat[j].style,
               mesh: cat[j].model,
               texture: cat[j].texture,
-              vox: cat[j].voxsobj[3],
-              ldr: cat[j].ldr[3],
-              voxsobj: cat[j].voxsobj[3]
+              vox: cat[j].voxsobj[0],
+              ldr: cat[j].ldr_with_stop[0],
+              voxsobj: cat[j].voxsobj[0]
             })
           }
         }
