@@ -24,6 +24,7 @@ import Zmage from 'react-zmage'
 
 import axios from 'axios';
 import { ShapeUtils } from 'three';
+import {OBJLoader2} from "three/examples/jsm/loaders/OBJLoader2";
 
 const ThreeBSP = require('tthreebsp')(THREE)
 
@@ -336,14 +337,22 @@ class HouseTemplate extends Component {
       console.log(type, objUrl)
       this.scene.remove(this.state.objs[type])
     }
-    const loader = new OBJLoader()
+    var loader = null
+    if (type=='human'){
+      loader = new OBJLoader2()
+    }else{
+      loader = new OBJLoader()
+    }
 
     loader.load(objUrl, geometry => {
       var material = new THREE.MeshLambertMaterial({ color: 0x5C3A21 });
 
       geometry.traverse(function (child) {
         if (child instanceof THREE.Mesh) {
-          child.material.map = THREE.ImageUtils.loadTexture(mtlUrl);
+          if (type!='human') {
+            child.material.map = THREE.ImageUtils.loadTexture(mtlUrl);
+          }else {
+          }
           child.material.needsUpdate = true;
         }
       });
@@ -360,6 +369,14 @@ class HouseTemplate extends Component {
       //  geometry.rotation.x = -2;
       let wrapper = new THREE.Object3D();
       wrapper.add(geometry)
+
+      const light3 = new THREE.SpotLight(0xffffff, 2.5);
+      light3.position.set(-1, -0.3, 1.5);
+      light3.target = wrapper;
+      light3.angle = Math.PI/10;
+      light3.distance = 3;
+      this.scene.add(light3);
+
       const objs = this.state.objs
       objs[type] = wrapper
       this.setState({
