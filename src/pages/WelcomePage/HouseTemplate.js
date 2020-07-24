@@ -17,7 +17,6 @@ import confirm_grey from './icons/confirm_grey.png'
 import wallPaper from './icons/wall.png'
 // import camera from './icons/camera.svg'
 
-
 import Modal from 'react-modal';
 import { OBJLoader, MTLLoader } from 'three-obj-mtl-loader';
 import Zmage from 'react-zmage'
@@ -37,13 +36,20 @@ const _SUPER_CATEGORIES_3D =
   'table': 4
 }
 
-const _SUPER_CATEGORIES_3D_REV =
+const _FINED_GRAINED_CATEGORY_ =
 {
-  1: 'shelf',
-  5: 'sofa',
-  3: 'chair',
-  7: 'lighting',
-  4: 'table'
+  'shelf': ['Children Cabinet',
+    'Wardrobe',
+    'Console',
+    'Wine Cooler',
+    'Drawer Chest / Corner',
+    'cabinet',
+    'Shelf',
+    'Round End Table'],
+  'chair': ['Lounge Chair / Book-chair / Computer Chair'],
+  'sofa': ['Three-Seat / Multi-person sofa',
+    'Two-seat Sofa'],
+  'table': ['Desk']
 }
 //  [
 //   {'id': 1, 'category': 'Cabinet/Shelf/Desk'},
@@ -79,6 +85,7 @@ class HouseTemplate extends Component {
       },
       wallColors: ['#FFFDE7', '#EFD0D6', '#FBD460', '#78909C'],
       isReselectOpen: false,
+      isPreviewOpen: false,
     }
   }
 
@@ -86,7 +93,7 @@ class HouseTemplate extends Component {
     this.init()
   }
 
-    init = () => {
+  init = () => {
         const scene =  new THREE.Scene()
         const camera = new THREE.PerspectiveCamera( 75, this.mount.clientWidth / this.mount.clientHeight, 0.1, 1000 );
         camera.lookAt(scene.position);
@@ -311,6 +318,12 @@ class HouseTemplate extends Component {
         loading: true,
       });
     }
+    else if (id == 'preview') {
+      this.setState({
+        isPreviewOpen: false,
+        loading: true,
+      });
+    }
     else {
       this.setState({
         modalIsOpen: !this.state.modalIsOpen,
@@ -341,7 +354,7 @@ class HouseTemplate extends Component {
     });
   }
 
-  loadObj = (objUrl, mtlUrl, type) => {
+  loadObj = async (objUrl, mtlUrl, type) => {
 
     console.log(mtlUrl)
     const oldObj = this.state.objs[type]
@@ -364,7 +377,7 @@ class HouseTemplate extends Component {
         // if (type == 'sofa') {
         //   geometry.children[0].geometry.center()
         // }
-      }
+      } 
 
       var material = new THREE.MeshLambertMaterial();
 
@@ -470,12 +483,12 @@ class HouseTemplate extends Component {
         objects.push(child)
       }
 
-      const { modalIsOpen, wallModalIsOpen } = this.state
+      const { modalIsOpen, wallModalIsOpen, isPreviewOpen, isReselectOpen } = this.state
       for (let type in this.state.objs) {
         if (type !== 'wall') {
           const object = this.state.objs[type]
           let intersects = raycaster.intersectObject(object, true);
-          if (intersects.length > 0 && !modalIsOpen && !wallModalIsOpen) {
+          if (intersects.length > 0 && !modalIsOpen && !wallModalIsOpen && !isPreviewOpen && !isReselectOpen) {
             this.setState({
               isReselectOpen: true,
               clickFurnitureType: type,
@@ -514,8 +527,20 @@ class HouseTemplate extends Component {
     })
   }
 
+  onPreviewClick = event => {
+    event.stopPropagation()
+    this.setState({
+      isPreviewOpen: true
+    })
+  }
+
+  getLdrName = () =>{ 
+    const {buildingObjectUrls, clickFurnitureType} = this.state
+    return buildingObjectUrls[clickFurnitureType] ? buildingObjectUrls[clickFurnitureType].ldr.split('/').pop() : ''
+  }
+
   render() {
-    const { modalIsOpen, wallModalIsOpen, items, loading, clickType, iconDisplayState, meshOrVox, isReselectOpen } = this.state
+    const { modalIsOpen, wallModalIsOpen, items, loading, clickType, iconDisplayState, meshOrVox, isReselectOpen, isPreviewOpen } = this.state
     return (
       <div
         className="canvas"
@@ -630,8 +655,37 @@ class HouseTemplate extends Component {
           }}>
             <div className="reselect-style-text">{'Reselect'}</div>
           </div>
+          <div className="reselect-image-wrapper" onClick={e => {
+            this.onPreviewClick(e)
+          }}>
+            <div className="reselect-style-text">{'Voxel Preview'}</div>
+          </div>
           
         </div>
+        </Modal>
+        <Modal
+          closeTimeoutMS={150}
+          isOpen={isPreviewOpen}
+          onRequestClose={e => { this.toggleModal('preview', e) }}
+          ariaHideApp={false}
+          // onAfterOpen={this.handleOnAfterOpenPreviewModal}
+          style={{
+            content: {
+              position: 'absolute',
+              top: '10%',
+              left: '10%',
+              right: '10%',
+              bottom: '10%',
+              backgroundColor: '#ffffff',
+              border: 'None',
+              boxShadow: '5px 5px 10px rgba(0,0,0,0.25)',
+              borderRadius: '25px',
+              padding: '0',
+            }
+          }}
+        >
+          {/* <div className="canvas-preview" ref={(previewMount) => { this.previewMount = previewMount }}></div> */}
+          <iframe className="canvas-preview" src={`http://103.79.27.148:8081/buildinginstructions/sample_view.htm?model=${this.getLdrName()}`}></iframe>
         </Modal>
       </div>
     );
@@ -939,18 +993,23 @@ class Item extends Component {
 
         let galleryImages = []
         for (let i in resJson) {
-          const cat = resJson[i]
-          for (let j in cat) {
-            galleryImages.push({
-              src: `http://103.79.27.148:8001/${cat[j].image}`,
-              alt: cat[j].style,
-              mesh: cat[j].model,
-              texture: cat[j].texture,
-              vox: cat[j].voxsobj[0],
-              ldr: cat[j].ldr_with_stop[0],
-              voxsobj: cat[j].voxsobj[0]
-            })
+          console.log(i, _FINED_GRAINED_CATEGORY_[type].indexOf(i))
+          if (_FINED_GRAINED_CATEGORY_[type].indexOf(i) > -1) {
+            const cat = resJson[i]
+            for (let j in cat) {
+              galleryImages.push({
+                // src: `http://103.79.27.148:8001/${cat[j].image}`,
+                src: cat[j].image,
+                alt: cat[j].style,
+                mesh: cat[j].model,
+                texture: cat[j].texture,
+                vox: cat[j].vox[0],
+                ldr: cat[j].ldr_with_stop[0],
+                voxsobj: cat[j].voxsobj[0]
+              })
+            }
           }
+          
         }
 
         this.setState({
@@ -992,8 +1051,7 @@ class Item extends Component {
 
   onRefreshClick = async () => {
     const { count, galleryImages } = this.state
-    console.log(galleryImages)
-    if ((galleryImages.length - 3) < count) {
+    if ((galleryImages.length - 3) <= count) {
       this.setState({
         loading: true,
       }, async () => {

@@ -216,3 +216,8 @@
       height: 40px;
       margin-top: 20px
   }
+
+  .canvas-preview {
+      height: 100%;
+      width: 100%;
+  }
