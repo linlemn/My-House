@@ -349,11 +349,12 @@ class HouseTemplate extends Component {
     const loader = new OBJLoader()
 
     loader.load(objUrl, geometry => {
-      // if (this.state.meshOrVox == 'vox') {
+      if (this.state.meshOrVox == 'vox') {
       //   var scale = this.computeScale(oldObj);
       //   console.log(scale)
       //   geometry.scale.multiplyScalar(scale);
-      // }
+      geometry.children[0].geometry.center()
+      }
 
       var material = new THREE.MeshLambertMaterial({ color: 0x5C3A21 });
 
@@ -474,6 +475,7 @@ class HouseTemplate extends Component {
   }
 
   onReselectionClick = event => {
+    this.onHouseTypeIconClick('mesh')
     event.stopPropagation()
     // 获取点击的类型，
     this.setState({
@@ -625,7 +627,7 @@ class HouseTemplate extends Component {
     var length = box.max.x - box.min.x;
     var height = box.max.y - box.min.y;
     var width = box.max.z - box.min.z;
-    console.log("before scaling", length, height, width)
+    console.log("before scaling", length, height, width) // m_height, m_width, m_length
     var m = new THREE.Matrix4();
     var vec = new THREE.Vector3(1, 0, 0);
     m.set(1 - 2 * vec.x * vec.x, -2 * vec.x * vec.y, -2 * vec.x * vec.z, 0,
@@ -634,11 +636,11 @@ class HouseTemplate extends Component {
       0, 0, 0, 1);
     if (this.state.meshOrVox == 'vox') {
       const { buildingObjectUrls } = this.state
-      const lengthScale = buildingObjectUrls[type].size[0] / length
-      const heightScale = buildingObjectUrls[type].size[1] / height
-      const widthScale = buildingObjectUrls[type].size[2] / width
+      const lengthScale = buildingObjectUrls[type].size[0] / height
+      const heightScale = buildingObjectUrls[type].size[1] / width
+      const widthScale = buildingObjectUrls[type].size[2] / length
       if (type == 'sofa') {
-        this.state.objs[type].scale.set(lengthScale, lengthScale, lengthScale)
+        this.state.objs[type].scale.set(lengthScale, heightScale, widthScale)
         box = new THREE.Box3();
         box.expandByObject(this.state.objs[type]);
         length = box.max.x - box.min.x;
@@ -648,8 +650,8 @@ class HouseTemplate extends Component {
         this.state.objs[type].rotateX(-Math.PI / 2)
         this.state.objs[type].rotateZ(Math.PI)
         this.state.objs[type].rotateY(-3 * Math.PI / 2)
-        this.state.objs[type].position.set(0, -1, -2)
         this.state.objs[type].applyMatrix4(m)
+        this.state.objs[type].position.set(0, -1, -1.6)
       } else if (type == 'chair') {
         // chair
         // this.state.objs[type].rotation.y = -1
