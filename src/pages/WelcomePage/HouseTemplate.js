@@ -729,9 +729,9 @@ class HouseTemplate extends Component {
         width = box.max.z - box.min.z;
         console.log("vox after scaling", length, height, width)
         this.state.objs[type].rotateX(-Math.PI / 2)
-        this.state.objs[type].rotateZ(-0.5*Math.PI)
+        this.state.objs[type].rotateZ(-2.5*Math.PI)
         this.state.objs[type].rotateY(-3 * Math.PI / 2)
-        this.state.objs[type].position.set(-3, -0.5+height, -1.6)
+        this.state.objs[type].position.set(-3, -0.7, -1.6)
 
         // this.state.objs[type].scale.set(0.05, 0.05, 0.05);
         // // this.state.objs[type].rotateY(-Math.PI/2)
