@@ -361,7 +361,9 @@ class HouseTemplate extends Component {
       //   var scale = this.computeScale(oldObj);
       //   console.log(scale)
       //   geometry.scale.multiplyScalar(scale);
-      // geometry.children[0].geometry.center()
+        // if (type == 'sofa') {
+        //   geometry.children[0].geometry.center()
+        // }
       }
 
       var material = new THREE.MeshLambertMaterial();
@@ -369,6 +371,7 @@ class HouseTemplate extends Component {
       geometry.traverse(function (child) {
         if (child instanceof THREE.Mesh) {
           if (type!='human') {
+            console.log(mtlUrl)
             child.material.map = THREE.ImageUtils.loadTexture(mtlUrl);
           }else {
           }
@@ -389,12 +392,19 @@ class HouseTemplate extends Component {
       let wrapper = new THREE.Object3D();
       wrapper.add(geometry)
 
-      const light3 = new THREE.SpotLight(0xffffff, 1);
-      light3.position.set(-1, -0.3, 1.5);
-      light3.target = wrapper;
-      light3.angle = Math.PI/10;
-      light3.distance = 3;
-      this.scene.add(light3);
+      if (type == 'human') {
+        const light3 = new THREE.SpotLight(0xffffff, 1);
+        light3.position.set(-1, -0.3, 1.5);
+        light3.target = wrapper;
+        light3.angle = Math.PI/10;
+        light3.distance = 3;
+        this.scene.add(light3);
+        this.setState({
+          light3: light3
+        })
+      } else {
+        this.scene.remove(this.state.light3)
+      }
 
       geometry.name = type
 
@@ -659,8 +669,11 @@ class HouseTemplate extends Component {
       const lengthScale = buildingObjectUrls[type].size[0] / height
       const heightScale = buildingObjectUrls[type].size[1] / width
       const widthScale = buildingObjectUrls[type].size[2] / length
+      console.log(lengthScale, heightScale, widthScale)
       if (type == 'sofa') {
-        this.state.objs[type].scale.set(lengthScale, heightScale, widthScale)
+        // this.state.objs[type].scale.set(lengthScale, heightScale, widthScale)
+        // this.state.objs[type].scale.set(lengthScale, lengthScale*0.5, lengthScale*0.9)
+        this.state.objs[type].scale.set(lengthScale, heightScale, lengthScale*0.8)
         box = new THREE.Box3();
         box.expandByObject(this.state.objs[type]);
         length = box.max.x - box.min.x;
@@ -671,7 +684,8 @@ class HouseTemplate extends Component {
         this.state.objs[type].rotateZ(Math.PI)
         this.state.objs[type].rotateY(-3 * Math.PI / 2)
         this.state.objs[type].applyMatrix4(m)
-        this.state.objs[type].position.set(0, -1, -1.6)
+        // this.state.objs[type].children[0].geometry.center()
+        this.state.objs[type].position.set(-2, -0.5, -2.6)
       } else if (type == 'chair') {
         // chair
         this.state.objs[type].scale.set(lengthScale/1.5, lengthScale/1.5, lengthScale/1.5)
@@ -719,7 +733,7 @@ class HouseTemplate extends Component {
     } else {
       if (type == 'sofa') {
         if (length > 2.4 && length < 3.5) {
-          this.state.objs[type].scale.set(0.8, 0.8, 0.6);
+          this.state.objs[type].scale.set(0.8, 0.8, 0.5);
         } else if (length >= 3.3) {
           this.state.objs[type].scale.set(0.6, 0.6, 0.45)
         }
