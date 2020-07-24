@@ -369,6 +369,7 @@ class HouseTemplate extends Component {
       geometry.traverse(function (child) {
         if (child instanceof THREE.Mesh) {
           if (type!='human') {
+            console.log(mtlUrl)
             child.material.map = THREE.ImageUtils.loadTexture(mtlUrl);
           }else {
           }
@@ -659,8 +660,10 @@ class HouseTemplate extends Component {
       const lengthScale = buildingObjectUrls[type].size[0] / height
       const heightScale = buildingObjectUrls[type].size[1] / width
       const widthScale = buildingObjectUrls[type].size[2] / length
+      console.log(lengthScale, heightScale, widthScale)
       if (type == 'sofa') {
-        this.state.objs[type].scale.set(lengthScale, heightScale, widthScale)
+        // this.state.objs[type].scale.set(lengthScale, heightScale, widthScale)
+        this.state.objs[type].scale.set(lengthScale, lengthScale*0.6, lengthScale)
         box = new THREE.Box3();
         box.expandByObject(this.state.objs[type]);
         length = box.max.x - box.min.x;
@@ -740,7 +743,7 @@ class HouseTemplate extends Component {
     } else {
       if (type == 'sofa') {
         if (length > 2.4 && length < 3.5) {
-          this.state.objs[type].scale.set(0.8, 0.8, 0.6);
+          this.state.objs[type].scale.set(0.8, 0.8, 0.5);
         } else if (length >= 3.3) {
           this.state.objs[type].scale.set(0.6, 0.6, 0.45)
         }
