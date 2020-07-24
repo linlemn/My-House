@@ -361,7 +361,9 @@ class HouseTemplate extends Component {
       //   var scale = this.computeScale(oldObj);
       //   console.log(scale)
       //   geometry.scale.multiplyScalar(scale);
-      // geometry.children[0].geometry.center()
+        // if (type == 'sofa') {
+        //   geometry.children[0].geometry.center()
+        // }
       }
 
       var material = new THREE.MeshLambertMaterial();
@@ -390,12 +392,19 @@ class HouseTemplate extends Component {
       let wrapper = new THREE.Object3D();
       wrapper.add(geometry)
 
-      const light3 = new THREE.SpotLight(0xffffff, 0.2);
-      light3.position.set(-1, -0.3, 1.5);
-      light3.target = wrapper;
-      light3.angle = Math.PI/10;
-      light3.distance = 3;
-      this.scene.add(light3);
+      if (type == 'human') {
+        const light3 = new THREE.SpotLight(0xffffff, 1);
+        light3.position.set(-1, -0.3, 1.5);
+        light3.target = wrapper;
+        light3.angle = Math.PI/10;
+        light3.distance = 3;
+        this.scene.add(light3);
+        this.setState({
+          light3: light3
+        })
+      } else {
+        this.scene.remove(this.state.light3)
+      }
 
       geometry.name = type
 
@@ -461,12 +470,12 @@ class HouseTemplate extends Component {
         objects.push(child)
       }
 
-      const { iconDisplayState, buildingObjectUrls } = this.state
+      const { modalIsOpen } = this.state
       for (let type in this.state.objs) {
         if (type !== 'wall') {
           const object = this.state.objs[type]
           let intersects = raycaster.intersectObject(object, true);
-          if (intersects.length > 0) {
+          if (intersects.length > 0 && !modalIsOpen) {
             this.setState({
               isReselectOpen: true,
               clickFurnitureType: type,
@@ -496,8 +505,8 @@ class HouseTemplate extends Component {
   }
 
   onReselectionClick = event => {
-    this.onHouseTypeIconClick('mesh')
     event.stopPropagation()
+    this.onHouseTypeIconClick('mesh')
     // 获取点击的类型，
     this.setState({
       isReselectOpen: !this.state.isReselectOpen,
@@ -663,7 +672,8 @@ class HouseTemplate extends Component {
       console.log(lengthScale, heightScale, widthScale)
       if (type == 'sofa') {
         // this.state.objs[type].scale.set(lengthScale, heightScale, widthScale)
-        this.state.objs[type].scale.set(lengthScale, lengthScale*0.6, lengthScale)
+        // this.state.objs[type].scale.set(lengthScale, lengthScale*0.5, lengthScale*0.9)
+        this.state.objs[type].scale.set(lengthScale, heightScale, lengthScale*0.8)
         box = new THREE.Box3();
         box.expandByObject(this.state.objs[type]);
         length = box.max.x - box.min.x;
@@ -674,7 +684,8 @@ class HouseTemplate extends Component {
         this.state.objs[type].rotateZ(Math.PI)
         this.state.objs[type].rotateY(-3 * Math.PI / 2)
         this.state.objs[type].applyMatrix4(m)
-        this.state.objs[type].position.set(0, -1, -1.6)
+        // this.state.objs[type].children[0].geometry.center()
+        this.state.objs[type].position.set(-2, -0.5, -2.6)
       } else if (type == 'chair') {
         // chair
         this.state.objs[type].scale.set(lengthScale/1.5, lengthScale/1.5, lengthScale/1.5)
@@ -688,36 +699,20 @@ class HouseTemplate extends Component {
         this.state.objs[type].rotateZ(Math.PI)
         this.state.objs[type].rotateY(-3 * Math.PI / 2)
         this.state.objs[type].position.set(1.8, -0.5, -0.5)
-        // this.state.objs[type].applyMatrix4(m)
-        // if (length > 0.5) {
-        //   this.state.objs[type].scale.x = 0.5;
-        // }
-        // if (width > 0.5) {
-        //   this.state.objs[type].scale.x = 0.5;
-        // }
-        // if (height > 0.5) {
-        //   this.state.objs[type].scale.x = 0.5;
-        // }
         this.state.objs[type].rotateX(1)
-        // this.state.objs[type].rotateX(0.1)
-        // this.state.objs[type].position.set(1.5, -1, -0.1)
       } else if (type == 'table') {
-        // this.state.objs[4].rotation.y = -1
-        this.state.objs[type].rotateX(-0.2)
-        this.state.objs[type].position.set(0, -1, 0)
-        if (length > 1.9) {
-          // this.state.objs[type].scale.set(0.6, 0.5, 0.5);
-          this.state.objs[type].scale.x = 0.5
-        }
-        if (height > 0.9 && height < 1.5) {
-          this.state.objs[type].scale.y = 0.5
-        } else if (height >= 1.5) {
-          this.state.objs[type].scale.y = 0.3
-        }
-        if (width > 0.6) {
-          this.state.objs[type].scale.z = 0.3
-        }
-        // this.state.objs[type].scale.set(0.7, 0.7, 0.7);
+        // table
+        this.state.objs[type].scale.set(lengthScale*0.6, widthScale*0.6,lengthScale*0.6)
+        box = new THREE.Box3();
+        box.expandByObject(this.state.objs[type]);
+        length = box.max.x - box.min.x;
+        height = box.max.y - box.min.y;
+        width = box.max.z - box.min.z;
+        console.log("vox after scaling", length, height, width)
+        this.state.objs[type].rotateX(-Math.PI / 2)
+        this.state.objs[type].rotateZ(Math.PI)
+        this.state.objs[type].rotateY(-3 * Math.PI / 2)
+        this.state.objs[type].position.set(1.3, -0.2, -0.9)
       } else if (type == 'bookshelf') {
 
         // bookshelf
@@ -729,15 +724,18 @@ class HouseTemplate extends Component {
         width = box.max.z - box.min.z;
         console.log("vox after scaling", length, height, width)
         this.state.objs[type].rotateX(-Math.PI / 2)
-        this.state.objs[type].rotateZ(-2.5*Math.PI)
+        this.state.objs[type].rotateZ(1.5*Math.PI)
         this.state.objs[type].rotateY(-3 * Math.PI / 2)
-        this.state.objs[type].position.set(-3, -0.7, -1.6)
+        this.state.objs[type].position.set(-3, -0.4+height, -2.2)
+        console.log('height')
+        console.log(height)
 
         // this.state.objs[type].scale.set(0.05, 0.05, 0.05);
         // // this.state.objs[type].rotateY(-Math.PI/2)
         // this.state.objs[type].rotateZ(Math.PI / 2)
         // // this.state.objs[type].rotateX(Math.PI)
         // this.state.objs[type].position.set(-1, -1, -2)
+        // this.state.objs[type].applyMatrix4(m)
       } else if (type == 'human') {
         this.state.objs[type].scale.set(0.7, 0.8, 0.7)
         this.state.objs[type].position.set(-1, -0.3, 0)
@@ -826,10 +824,10 @@ class Item extends Component {
   }
 
   toggleModal = (selection, wallPaper = 1) => async event => {
+    event.preventDefault();
+    event.stopPropagation();
     if (selection === 'wall') {
       console.log(selection)
-      // event.preventDefault();
-      event.stopPropagation();
       const _objs = this.props.parent.state.objs
       const wallMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color(this.props.parent.state.wallColors[wallPaper - 1]) });
       _objs['wall'].material = wallMaterial
