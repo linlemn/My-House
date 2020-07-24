@@ -716,7 +716,7 @@ class HouseTemplate extends Component {
       } else if (type == 'bookshelf') {
 
         // bookshelf
-        this.state.objs[type].scale.set(lengthScale, widthScale, lengthScale)
+        this.state.objs[type].scale.set(lengthScale/0.8, heightScale/0.8, widthScale/0.8)
         box = new THREE.Box3();
         box.expandByObject(this.state.objs[type]);
         length = box.max.x - box.min.x;
@@ -726,7 +726,7 @@ class HouseTemplate extends Component {
         this.state.objs[type].rotateX(-Math.PI / 2)
         this.state.objs[type].rotateZ(1.5*Math.PI)
         this.state.objs[type].rotateY(-3 * Math.PI / 2)
-        this.state.objs[type].position.set(-3, -0.4+height, -2.2)
+        this.state.objs[type].position.set(-3, -0.4+height, -2)
         console.log('height')
         console.log(height)
 
