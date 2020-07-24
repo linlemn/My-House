@@ -13,6 +13,7 @@ import refresh from './icons/refresh.svg'
 import meshHouse from './icons/meshHouse.svg'
 import voxHouse from './icons/voxHouse.svg'
 import confirm from './icons/confirm.svg'
+import confirm_grey from './icons/confirm_grey.png'
 import wallPaper from './icons/wall.png'
 // import camera from './icons/camera.svg'
 
@@ -103,6 +104,10 @@ class HouseTemplate extends Component {
         light1.position.set(0, 7, 4);
         scene.add(light1);
 
+        const light2 = new THREE.SpotLight(0xffffff, 0.12);
+        light2.position.set(0, 0, 50);
+        scene.add(light2);
+
         scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
 
         document.addEventListener('mousedown', this.onFurnitureClick, false);
@@ -111,6 +116,7 @@ class HouseTemplate extends Component {
         // this.createIcon()
         this.loadModel()
         this.animate()
+        // this.loadObj(`${process.env.PUBLIC_URL}/0000008.obj`, `${process.env.PUBLIC_URL}/0000033.png`, 'obj')
     }
 
     loadModel = () => {
@@ -335,7 +341,10 @@ class HouseTemplate extends Component {
   }
 
   loadObj = (objUrl, mtlUrl, type) => {
-
+    if (type in this.state.objs) {
+      console.log(type, objUrl)
+      this.scene.remove(this.state.objs[type])
+    }
     const loader = new OBJLoader()
 
     loader.load(objUrl, geometry => {
@@ -358,23 +367,25 @@ class HouseTemplate extends Component {
       });
 
       //  geometry.rotation.x = -2;
+      let wrapper = new THREE.Object3D();
+      wrapper.add(geometry)
+      geometry.name = type
       const objs = this.state.objs
       if (objs[type]) {
         this.scene.remove(objs[type])
       }
-      objs[type] = geometry
-      this.scene.add(objs[type]);
+      objs[type] = wrapper
       this.setState({
         objs
       })
       this.placeFurniture(type)
-      geometry.name = type
+      this.scene.add(wrapper);
     });
       
   }
 
   getChildrenMsg = (type, galleryImage) => {
-    this.loadObj(galleryImage.mesh, galleryImage.texture, type)
+    this.loadObj(this.state.meshOrVox == 'mesh' ? galleryImage.mesh : galleryImage.voxsobj, galleryImage.texture, type)
     let iconDisplayState = this.state.iconDisplayState
     iconDisplayState[type] = false
     const {buildingObjectUrls} = this.state
@@ -382,7 +393,7 @@ class HouseTemplate extends Component {
     this.setState({
       iconDisplayState,
       modalIsOpen: false,
-      buildingObjectUrls
+      buildingObjectUrls: buildingObjectUrls
     })
   }
     
@@ -396,6 +407,11 @@ class HouseTemplate extends Component {
       this.setState({
         meshOrVox: type
       })
+      for (let _type in this.state.buildingObjectUrls) {
+        const obj = this.state.buildingObjectUrls[_type]
+        console.log(obj.mesh, obj.voxsobj)
+        this.loadObj(type == 'mesh' ? obj.mesh : obj.voxsobj, obj.texture, _type)
+      }
     }
   }
 
@@ -583,25 +599,125 @@ class HouseTemplate extends Component {
   }
 
   placeFurniture(type) {
-    this.state.objs[type].scale.set(0.8, 0.8, 0.8);
-    if (type == 'sofa') {
-      this.state.objs[type].scale.set(0.7, 0.7, 0.7);
-      this.state.objs[type].rotation.x = -0.1
-      this.state.objs[type].position.set(0, -1, -0.6)
-    } else if (type == 'chair') {
-      // chair
-      // this.state.objs[3].rotation.y = -1
-      // this.state.objs[3].rotation.x = -0.2
-      this.state.objs[type].position.set(1.5, -1, -0.2)
-    } else if (type == 'table') {
-      // this.state.objs[4].rotation.y = -1
-      this.state.objs[type].rotation.x = -0.2
-      this.state.objs[type].position.set(0, -1, 0)
-      this.state.objs[type].scale.set(0.7, 0.7, 0.7);
-    } else if (type == 'bookshelf') {
-      // this.state.objs[cat].scale.set(0.7, 0.7, 0.7);
-      this.state.objs[type].rotation.y = 1.8
-      this.state.objs[type].position.set(-1.8, -1, -0.2)
+    var box = new THREE.Box3();
+    box.expandByObject(this.state.objs[type]);
+    var length = box.max.x - box.min.x;
+    var width = box.max.z - box.min.z;
+    var height = box.max.y - box.min.y;
+    console.log(length, width, height)
+    if (this.state.meshOrVox == 'vox') {
+      this.state.objs[type].scale.set(0.025, 0.025, 0.025);
+      // this.state.objs[type].rotateZ(1.6)
+      // this.state.objs[type].rotateY(-3.2)
+      // this.state.objs[type].rotateX(-0.1)
+      if (type == 'sofa') {
+        // if (length > 2.4 && length < 3.5) {
+        //   this.state.objs[type].scale.set(0.8, 0.8, 0.6);
+        // } else if (length >= 3.3) {
+        //   this.state.objs[type].scale.set(0.6, 0.6, 0.45)
+        // }
+        this.state.objs[type].scale.set(0.05, 0.05, 0.05);
+        this.state.objs[type].rotateZ(-Math.PI)
+        this.state.objs[type].rotateY(-3*Math.PI/2)
+        this.state.objs[type].position.set(0, -0.5, -1.3)
+      } else if (type == 'chair') {
+        // chair
+        // this.state.objs[type].rotation.y = -1
+        // this.state.objs[type].rotation.x = -0.2
+        if (length > 0.5) {
+          this.state.objs[type].scale.x = 0.5;
+        }
+        if (width > 0.5) {
+          this.state.objs[type].scale.x = 0.5;
+        }
+        if (height > 0.5) {
+          this.state.objs[type].scale.x = 0.5;
+        }
+        this.state.objs[type].rotateY(-1)
+        // this.state.objs[type].rotateX(0.1)
+        this.state.objs[type].position.set(1.5, -1, -0.1)
+      } else if (type == 'table') {
+        // this.state.objs[4].rotation.y = -1
+        this.state.objs[type].rotateX(-0.2)
+        this.state.objs[type].position.set(0, -1, 0)
+        if (length > 1.9) {
+          // this.state.objs[type].scale.set(0.6, 0.5, 0.5);
+          this.state.objs[type].scale.x = 0.5
+        } 
+        if (height > 0.9 && height < 1.5) {
+          this.state.objs[type].scale.y = 0.5
+        } else if (height >= 1.5) {
+          this.state.objs[type].scale.y = 0.3
+        }
+        if (width > 0.6) {
+          this.state.objs[type].scale.z = 0.3
+        }
+        // this.state.objs[type].scale.set(0.7, 0.7, 0.7);
+      } else if (type == 'bookshelf') {
+        this.state.objs[type].scale.set(0.05, 0.05, 0.05);
+        // this.state.objs[type].rotateY(-Math.PI/2)
+        this.state.objs[type].rotateZ(Math.PI/2)
+        // this.state.objs[type].rotateX(Math.PI)
+        this.state.objs[type].position.set(0, -1, -1)
+      } else if (type == 'human') {
+        this.state.objs[type].scale.set(0.7, 0.8, 0.7)
+        this.state.objs[type].position.set(-1, -0.3, 0)
+      }
+    } else {
+      if (type == 'sofa') {
+        if (length > 2.4 && length < 3.5) {
+          this.state.objs[type].scale.set(0.8, 0.8, 0.6);
+        } else if (length >= 3.3) {
+          this.state.objs[type].scale.set(0.6, 0.6, 0.45)
+        }
+        // this.state.objs[type].rotation.x = -0.1
+        this.state.objs[type].position.set(0, -1, -0.6)
+      } else if (type == 'chair') {
+        // chair
+        // this.state.objs[type].rotation.y = -1
+        // this.state.objs[type].rotation.x = -0.2
+        if (length > 0.5) {
+          this.state.objs[type].scale.x = 0.5;
+        }
+        if (width > 0.5) {
+          this.state.objs[type].scale.x = 0.5;
+        }
+        if (height > 0.5) {
+          this.state.objs[type].scale.x = 0.5;
+        }
+        this.state.objs[type].rotateY(-1)
+        // this.state.objs[type].rotateX(0.1)
+        this.state.objs[type].position.set(1.5, -1, -0.1)
+      } else if (type == 'table') {
+        // this.state.objs[4].rotation.y = -1
+        this.state.objs[type].rotateX(-0.2)
+        this.state.objs[type].position.set(0, -1, 0)
+        if (length > 1.9) {
+          // this.state.objs[type].scale.set(0.6, 0.5, 0.5);
+          this.state.objs[type].scale.x = 0.5
+        } 
+        if (height > 0.9 && height < 1.5) {
+          this.state.objs[type].scale.y = 0.5
+        } else if (height >= 1.5) {
+          this.state.objs[type].scale.y = 0.3
+        }
+        if (width > 0.6) {
+          this.state.objs[type].scale.z = 0.3
+        }
+        // this.state.objs[type].scale.set(0.7, 0.7, 0.7);
+      } else if (type == 'bookshelf') {
+        if (length > 1.5) {
+          this.state.objs[type].scale.set(0.3, 0.7, 0.7);
+        } else {
+          this.state.objs[type].scale.set(0.7, 0.7, 0.7);
+        }
+        this.state.objs[type].rotateY(Math.PI/2)
+        this.state.objs[type].position.set(-1.8, -1, -0.2)
+      } else if (type == 'human') {
+        this.state.objs[type].scale.set(0.7, 0.8, 0.7)
+        this.state.objs[type].position.set(-1, -0.3, 0)
+
+      }
     }
   }
 }
@@ -614,6 +730,7 @@ class Item extends Component {
       isOpen: false,
       loading: true,
       browsing: false,
+      confirm_disable: false,
       count: 0,
     };
   }
@@ -751,8 +868,9 @@ class Item extends Component {
               alt: cat[j].style,
               mesh: cat[j].model,
               texture: cat[j].texture,
-              vox: cat[j].vox[0],
-              ldr: cat[j].ldr[0]
+              vox: cat[j].voxsobj[0],
+              ldr: cat[j].ldr_with_stop[0],
+              voxsobj: cat[j].voxsobj[0]
             })
           }
         }
@@ -820,8 +938,20 @@ class Item extends Component {
   }
 
   onConfirmClick = async e => {
-    // e.preventDefault();
-    e.stopPropagation();
+
+    e.preventDefault();
+
+    if (this.state.confirm_disable == true){
+      return
+    }
+
+    // 设置confirm icon disable
+    this.setState({
+      confirm_disable: true
+    })
+    var confirm_icon = document.getElementById('confirm-icon')
+    confirm_icon.src = confirm_grey
+
     const { selectedAlbumImage } = this.state
     const { type } = this.props
     let formdata = new FormData();
@@ -841,15 +971,17 @@ class Item extends Component {
               "Content-type": "multipart/form-data",
             },
           })
-        const { url_mesh, url_texture, url_vox, url_ldr_with_stop } = res.data
+        const { url_mesh, url_texture, url_vox, url_ldr_with_stop, url_voxsobj } = res.data
+        console.log(res.data)
         this.props.parent.getChildrenMsg(type, {
           mesh: url_mesh,
           texture: url_texture,
           vox: url_vox,
-          ldr: url_ldr_with_stop
+          ldr: url_ldr_with_stop,
+          voxsobj: url_voxsobj
         })
         this.setState({
-          isOpen: false
+          isOpen: false,
         })
 
       } else {
@@ -861,12 +993,13 @@ class Item extends Component {
               "Content-type": "multipart/form-data",
             },
           })
-        const { url_mesh, url_texture, url_vox, url_ldr } = res.data
+        const { url_mesh, url_texture, url_vox, url_ldr, url_voxsobj } = res.data
         this.props.parent.getChildrenMsg(type, {
           mesh: url_mesh,
           texture: url_texture,
           vox: url_vox,
-          ldr: url_ldr
+          ldr: url_ldr,
+          voxsobj: url_voxsobj
         })
         this.setState({
           isOpen: false
@@ -875,6 +1008,12 @@ class Item extends Component {
     } catch (err) {
       console.log(err)
     }
+
+    // 设置confirm icon 不 disable
+    this.setState({
+      confirm_disable: false
+    })
+    confirm_icon.src = confirm
 
   }
 
@@ -936,7 +1075,7 @@ class Item extends Component {
             className="album-image"
             browsing={browsing}
           />
-          <img src={confirm} className="confirm-icon" onClick={this.onConfirmClick} />
+          <img src={confirm} id="confirm-icon" className="confirm-icon" onClick={this.onConfirmClick} />
         </div>
       }
 
