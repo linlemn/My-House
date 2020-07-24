@@ -72,10 +72,11 @@ class HouseTemplate extends Component {
         'bookshelf': true
       },
       meshOrVox: 'mesh',
-      buildingObjects: {
+      buildingObjectUrls: {
 
       },
       wallColors: ['#FFFDE7', '#EFD0D6', '#FBD460', '#78909C'],
+      isReselectOpen: false,
     }
   }
 
@@ -103,7 +104,7 @@ class HouseTemplate extends Component {
         scene.add(light1);
 
         scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
-      
+
         document.addEventListener('mousedown', this.onFurnitureClick, false);
 
         this.createRoom()
@@ -289,13 +290,21 @@ class HouseTemplate extends Component {
   }
 
   toggleModal = (id, event) => {
-    event.preventDefault();
+    // event.preventDefault();
+    event.stopPropagation();
     if (id == 'wall') {
       this.setState({
         wallModalIsOpen: !this.state.wallModalIsOpen,
         loading: true
       })
-    } else {
+    } 
+    else if (id == 'reselect') {
+      this.setState({
+        isReselectOpen: false,
+        loading: true,
+      });
+    }
+    else {
       this.setState({
         modalIsOpen: !this.state.modalIsOpen,
         loading: true,
@@ -350,16 +359,17 @@ class HouseTemplate extends Component {
 
       //  geometry.rotation.x = -2;
       const objs = this.state.objs
+      if (objs[type]) {
+        this.scene.remove(objs[type])
+      }
       objs[type] = geometry
+      this.scene.add(objs[type]);
       this.setState({
         objs
       })
       this.placeFurniture(type)
       geometry.name = type
-      this.scene.add(geometry);
     });
-
-    
       
   }
 
@@ -391,6 +401,7 @@ class HouseTemplate extends Component {
 
   onFurnitureClick = event => {
     event.preventDefault();
+    event.stopPropagation();
     let objects = [];
     const raycaster = new THREE.Raycaster();
     let mouse = new THREE.Vector2();
@@ -405,31 +416,51 @@ class HouseTemplate extends Component {
         objects.push(child)
       }
 
-      const {iconDisplayState, buildingObjectUrls} = this.state
       for (let type in this.state.objs) {
         if (type !== 'wall') {
           const object = this.state.objs[type]
           let intersects = raycaster.intersectObject(object, true);
           if (intersects.length > 0) {
-            // 跳转前记录
-          let iconDisplayStateRecord = ''
-          for (let t in buildingObjectUrls) {
-            if (buildingObjectUrls[t]) {
-              window.sessionStorage.setItem(t, `mesh:${buildingObjectUrls[t].mesh}?texture:${buildingObjectUrls[t].texture}?ldr:${buildingObjectUrls[t].ldr}?vox:${buildingObjectUrls[t].obj}`)
-              iconDisplayStateRecord += `${t}:${iconDisplayState[t]}?`
-            }
-          }
-            // type是字符串
-            const ldr = this.state.galleryImages[type].ldr.split('/').pop()
-            window.location.href = (`http://103.79.27.148:8081/?model=${ldr}`)
+            console.log(this.state.objs, type)
+            this.setState({
+              isReselectOpen: true,
+              clickFurnitureType: type,
+              clickType: type,
+            })
           }
         }
       }
     }, false)
   }
 
+  toInstruction = event => {
+    event.stopPropagation()
+    const {iconDisplayState, buildingObjectUrls, clickFurnitureType} = this.state
+    // 跳转前记录
+    let iconDisplayStateRecord = ''
+    for (let t in buildingObjectUrls) {
+      if (buildingObjectUrls[t]) {
+        window.sessionStorage.setItem(t, `mesh:${buildingObjectUrls[t].mesh}?texture:${buildingObjectUrls[t].texture}?ldr:${buildingObjectUrls[t].ldr}?vox:${buildingObjectUrls[t].obj}`)
+        iconDisplayStateRecord += `${t}:${iconDisplayState[t]}?`
+      }
+    }
+    window.sessionStorage.setItem('iconDisplayState', iconDisplayStateRecord)
+      // type是字符串
+      const ldr = this.state.buildingObjectUrls[clickFurnitureType].ldr.split('/').pop()
+      window.location.href = (`http://103.79.27.148:8081/?model=${ldr}`)
+  }
+
+  onReselectionClick = event => {
+    event.stopPropagation()
+    // 获取点击的类型，
+    this.setState({
+      isReselectOpen: !this.state.isReselectOpen,
+      modalIsOpen: !this.state.modalIsOpen
+    })
+  }
+
   render() {
-    const { modalIsOpen, wallModalIsOpen, items, loading, clickType, iconDisplayState, meshOrVox } = this.state
+    const { modalIsOpen, wallModalIsOpen, items, loading, clickType, iconDisplayState, meshOrVox, isReselectOpen } = this.state
     return (
       <div
         className="canvas"
@@ -512,6 +543,41 @@ class HouseTemplate extends Component {
             }
           </div>
         </Modal>
+        <Modal
+          closeTimeoutMS={150}
+          isOpen={isReselectOpen}
+          onRequestClose={e => { this.toggleModal('reselect', e) }}
+          ariaHideApp={false}
+          onAfterOpen={this.handleOnAfterOpenModal}
+          style={{
+            content: {
+              position: 'absolute',
+              top: '20%',
+              left: '30%',
+              right: '30%',
+              bottom: '20%',
+              backgroundColor: 'rgba(255, 255, 255)',
+              border: 'None',
+              boxShadow: '5px 5px 10px rgba(0,0,0,0.25)',
+              borderRadius: '10%',
+              padding: '35px',
+            }
+          }}
+        >
+          <div className="reselect-images-wrapper">
+          <div className="reselect-image-wrapper" onClick={e => {
+            this.toInstruction(e)
+          }}>
+            <div className="reselect-style-text">{'LEGO Instruction'}</div>
+          </div>
+          <div className="reselect-image-wrapper" onClick={e => {
+            this.onReselectionClick(e)
+          }}>
+            <div className="reselect-style-text">{'Reselect'}</div>
+          </div>
+          
+        </div>
+        </Modal>
       </div>
     );
   }
@@ -555,7 +621,8 @@ class Item extends Component {
   toggleModal = (selection, wallPaper = 1) => async event => {
     if (selection === 'wall') {
       console.log(selection)
-      event.preventDefault();
+      // event.preventDefault();
+      event.stopPropagation();
       const _objs = this.props.parent.state.objs
       const wallMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color(this.props.parent.state.wallColors[wallPaper - 1]) });
       _objs['wall'].material = wallMaterial
@@ -591,7 +658,8 @@ class Item extends Component {
   };
 
   onChosenWallColor = (selection, wallPaper = 1) => async event => {
-    event.preventDefault();
+    // event.preventDefault();
+    event.stopPropagation();
     const _objs = this.props.parent.state.objs
     const wallMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color(this.props.parent.state.wallColors[wallPaper]) });
     _objs['wall'].material = wallMaterial
@@ -613,7 +681,7 @@ class Item extends Component {
         //   <input type="file" accept="image/*" capture="camera" />  
         // </div>
         case 'gallery':
-          return <div className="selection" key={selection} onTouchStart={toggleModal}>
+          return <div className="selection" key={selection} onClick={toggleModal}>
           <img src={gallery} /> 
         </div>
       case 'album':
@@ -752,7 +820,8 @@ class Item extends Component {
   }
 
   onConfirmClick = async e => {
-    e.preventDefault();
+    // e.preventDefault();
+    e.stopPropagation();
     const { selectedAlbumImage } = this.state
     const { type } = this.props
     let formdata = new FormData();
