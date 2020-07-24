@@ -386,7 +386,7 @@ class HouseTemplate extends Component {
       let wrapper = new THREE.Object3D();
       wrapper.add(geometry)
 
-      const light3 = new THREE.SpotLight(0xffffff, 1);
+      const light3 = new THREE.SpotLight(0xffffff, 0.2);
       light3.position.set(-1, -0.3, 1.5);
       light3.target = wrapper;
       light3.angle = Math.PI/10;
