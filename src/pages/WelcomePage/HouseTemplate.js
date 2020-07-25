@@ -369,6 +369,14 @@ class HouseTemplate extends Component {
       loader = new OBJLoader()
     }
 
+    // const objModel = await axios({
+    //     method:'get',
+    //     url:`/bibi/${objUrl}`,
+    //     responseType:'blob',
+    //   })
+
+    // console.log(objModel)
+
     loader.load(objUrl, geometry => {
       if (this.state.meshOrVox == 'vox') {
       //   var scale = this.computeScale(oldObj);
@@ -514,7 +522,7 @@ class HouseTemplate extends Component {
     window.sessionStorage.setItem('iconDisplayState', iconDisplayStateRecord)
       // type是字符串
       const ldr = this.state.buildingObjectUrls[clickFurnitureType].ldr.split('/').pop()
-      window.location.href = (`http://103.79.27.148:8081/?model=${ldr}`)
+      window.location.href = (`http://103.79.27.148:8081/sample_instruction.htm?model=${ldr}`)
   }
 
   onReselectionClick = event => {
@@ -583,9 +591,9 @@ class HouseTemplate extends Component {
           <img src={meshHouse} className={meshOrVox == 'mesh' ? 'house-selected' : 'house-unselected'} onClick={e => {
             this.onHouseTypeIconClick('mesh')
           }}></img>
-          <img src={voxHouse} className={meshOrVox == 'vox' ? 'house-selected' : 'house-unselected'} onClick={e => {
+          {/* <img src={voxHouse} className={meshOrVox == 'vox' ? 'house-selected' : 'house-unselected'} onClick={e => {
             this.onHouseTypeIconClick('vox')
-          }}></img>
+          }}></img> */}
         </div>
         {iconDisplayState['sofa'] && <img className="icon sofa" id="sofa" src={sofa} onMouseDown={e => { this.toggleModal('sofa', e) }} />}
         {iconDisplayState['table'] && <img className="icon table" id="table" src={table} onMouseDown={e => { this.toggleModal('table', e) }} />}
@@ -658,7 +666,7 @@ class HouseTemplate extends Component {
           <div className="reselect-image-wrapper" onClick={e => {
             this.onPreviewClick(e)
           }}>
-            <div className="reselect-style-text">{'Voxel Preview'}</div>
+            <div className="reselect-style-text">{'LEGO Preview'}</div>
           </div>
           
         </div>
@@ -979,7 +987,7 @@ class Item extends Component {
     console.log(selection)
     if (selection == 'gallery') {
       try {
-        const res = await fetch('/photos/gallery', {
+        const res = await fetch('/bibi/photos/gallery', {
           method: 'post',
           body: this.transformRequest({
             category: _SUPER_CATEGORIES_3D[type]
@@ -998,14 +1006,15 @@ class Item extends Component {
             const cat = resJson[i]
             for (let j in cat) {
               galleryImages.push({
-                // src: `http://103.79.27.148:8001/${cat[j].image}`,
-                src: cat[j].image,
+                src: `/bibi/${cat[j].image}`,
+                // src: cat[j].image,
                 alt: cat[j].style,
-                mesh: cat[j].model,
-                texture: cat[j].texture,
-                vox: cat[j].vox[0],
-                ldr: cat[j].ldr_with_stop[0],
-                voxsobj: cat[j].voxsobj[0]
+                // mesh: `http://103.79.27.148:8001/${cat[j].model}`,
+                mesh: `/bibi/${cat[j].model}`,
+                texture: `/bibi/${cat[j].texture}`,
+                vox: `/bibi/${cat[j].vox[0]}`,
+                ldr: `/bibi/${cat[j].ldr_with_stop[0]}`,
+                voxsobj: `/bibi/${cat[j].voxsobj[0]}`
               })
             }
           }
@@ -1122,7 +1131,7 @@ class Item extends Component {
 
       } else {
         const res = await axios.post(
-          '/photos/reconstruction-upload/',
+          '/bibi/photos/reconstruction-upload/',
           formdata,
           {
             headers: {
