@@ -38,7 +38,7 @@ const _SUPER_CATEGORIES_3D =
 
 const _FINED_GRAINED_CATEGORY_ =
 {
-  'shelf': ['Children Cabinet',
+  'bookshelf': ['Children Cabinet',
     'Wardrobe',
     'Console',
     'Wine Cooler',
@@ -179,16 +179,6 @@ class HouseTemplate extends Component {
     shape.lineTo(x + radius, y);
     shape.quadraticCurveTo(x, y, x, y + radius);
     return shape
-  }
-
-  createIcon = () => {
-    const geom1 = new THREE.CircleGeometry(0.3, 360)
-    const loader = new THREE.TextureLoader()
-    const texture = loader.load(require('./icons/sofa.png'))
-    const material = new THREE.MeshBasicMaterial({ map: texture })
-    material.transparent = true
-    const mesh = new THREE.Mesh(geom1, material)
-    // this.scene.add(mesh)
   }
 
   createRoom = () => {
@@ -356,7 +346,7 @@ class HouseTemplate extends Component {
 
   loadObj = async (objUrl, mtlUrl, type) => {
 
-    console.log(mtlUrl)
+    console.log(mtlUrl, objUrl)
     const oldObj = this.state.objs[type]
     if (type in this.state.objs) {
       console.log(type, objUrl)
@@ -369,23 +359,7 @@ class HouseTemplate extends Component {
       loader = new OBJLoader()
     }
 
-    // const objModel = await axios({
-    //     method:'get',
-    //     url:`/bibi/${objUrl}`,
-    //     responseType:'blob',
-    //   })
-
-    // console.log(objModel)
-
     loader.load(objUrl, geometry => {
-      if (this.state.meshOrVox == 'vox') {
-      //   var scale = this.computeScale(oldObj);
-      //   console.log(scale)
-      //   geometry.scale.multiplyScalar(scale);
-        // if (type == 'sofa') {
-        //   geometry.children[0].geometry.center()
-        // }
-      } 
 
       var material = new THREE.MeshLambertMaterial();
 
@@ -527,7 +501,6 @@ class HouseTemplate extends Component {
 
   onReselectionClick = event => {
     event.stopPropagation()
-    this.onHouseTypeIconClick('mesh')
     // 获取点击的类型，
     this.setState({
       isReselectOpen: !this.state.isReselectOpen,
@@ -1007,9 +980,7 @@ class Item extends Component {
             for (let j in cat) {
               galleryImages.push({
                 src: `/bibi/${cat[j].image}`,
-                // src: cat[j].image,
                 alt: cat[j].style,
-                // mesh: `http://103.79.27.148:8001/${cat[j].model}`,
                 mesh: `/bibi/${cat[j].model}`,
                 texture: `/bibi/${cat[j].texture}`,
                 vox: `/bibi/${cat[j].vox[0]}`,
@@ -1109,7 +1080,7 @@ class Item extends Component {
       if (type != 'human') {
 
         const res = await axios.post(
-          '/photos/basic-upload/',
+          '/bibi/photos/basic-upload/',
           formdata,
           {
             headers: {
@@ -1117,13 +1088,12 @@ class Item extends Component {
             },
           })
         const { url_mesh, url_texture, url_vox, url_ldr_with_stop, url_voxsobj } = res.data
-        console.log(res.data)
         this.props.parent.getChildrenMsg(type, {
-          mesh: url_mesh,
-          texture: url_texture,
-          vox: url_vox,
-          ldr: url_ldr_with_stop,
-          voxsobj: url_voxsobj
+          mesh: `/bibi/${url_mesh}`,
+          texture: `/bibi/${url_texture}`,
+          vox: `/bibi/${url_vox}`,
+          ldr: `/bibi/${url_ldr_with_stop}`,
+          voxsobj: `/bibi/${url_voxsobj}`
         })
         this.setState({
           isOpen: false,
@@ -1138,13 +1108,13 @@ class Item extends Component {
               "Content-type": "multipart/form-data",
             },
           })
-        const { url_mesh, url_texture, url_vox, url_ldr, url_voxsobj } = res.data
+        const { url_mesh, url_texture, url_vox, url_ldr_with_stop, url_voxsobj } = res.data
         this.props.parent.getChildrenMsg(type, {
-          mesh: url_mesh,
-          texture: url_texture,
-          vox: url_vox,
-          ldr: url_ldr,
-          voxsobj: url_voxsobj
+          mesh: `/bibi/${url_mesh}`,
+          texture: `/bibi/${url_texture}`,
+          vox: `/bibi/${url_vox}`,
+          ldr: `/bibi/${url_ldr_with_stop}`,
+          voxsobj: `/bibi/${url_voxsobj}`
         })
         this.setState({
           isOpen: false
@@ -1247,8 +1217,8 @@ class Item extends Component {
             content: {
               position: 'absolute',
               top: '10%',
-              left: '10%',
-              right: '10%',
+              left: '5%',
+              right: '5%',
               bottom: '10%',
               backgroundColor: '#ffffff',
               border: 'None',

@@ -24,19 +24,19 @@
 
 .chair {
     bottom: 70px;
-    right: 250px;
+    right: 150px;
 }
 
 .human {
     bottom: 70px;
-    left: 270px;
+    left: 200px;
     width: 30px;
     height: 42px
 }
 
 .bookshelf {
     top: 140px;
-    left: 150px;
+    left: 100px;
 }
 
 .wall-selection-wrapper {
