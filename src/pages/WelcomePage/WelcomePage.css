@@ -3,7 +3,7 @@
   top: 0;
   bottom: 0;
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   background: #FBD460;
   display: flex;
   flex-direction: column;
@@ -64,4 +64,5 @@
     top: 5%;
     font-size: 1.4rem;
     font-weight: 200;
+    
   }
