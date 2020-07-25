@@ -496,7 +496,7 @@ class HouseTemplate extends Component {
     window.sessionStorage.setItem('iconDisplayState', iconDisplayStateRecord)
       // type是字符串
       const ldr = this.state.buildingObjectUrls[clickFurnitureType].ldr.split('/').pop()
-      window.location.href = (`http://103.79.27.148:8081/sample_instruction.htm?model=${ldr}`)
+      window.location.href = (`http://103.79.27.148:8081/buildinginstructions/sample_instructions.htm?model=${ldr}`)
   }
 
   onReselectionClick = event => {
