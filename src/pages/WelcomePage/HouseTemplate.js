@@ -22,10 +22,12 @@ import { OBJLoader, MTLLoader } from 'three-obj-mtl-loader';
 import Zmage from 'react-zmage'
 
 import axios from 'axios';
-import { ShapeUtils } from 'three';
+import { ShapeUtils, ImageLoader } from 'three';
 import {OBJLoader2} from "three/examples/jsm/loaders/OBJLoader2";
 
 const ThreeBSP = require('tthreebsp')(THREE)
+
+THREE.ImageUtils.crossOrigin = "";
 
 const _SUPER_CATEGORIES_3D =
 {
@@ -128,7 +130,8 @@ class HouseTemplate extends Component {
     }
 
   loadModel = () => {
-    // iconDisplayState
+    if (document.referrer.indexOf('8081') <= -1)
+      return
     const iconDisplayStateRecord = window.sessionStorage.getItem('iconDisplayState')
     if (iconDisplayStateRecord) {
       let ids = {
@@ -367,7 +370,10 @@ class HouseTemplate extends Component {
         if (child instanceof THREE.Mesh) {
           if (type!='human') {
             console.log(mtlUrl)
+            const l = new ImageLoader()
+            l.setCrossOrigin('Anonymous')
             child.material.map = THREE.ImageUtils.loadTexture(mtlUrl);
+            // child.material.map = l.loadTexture(mtlUrl);
           }else {
           }
           child.material.needsUpdate = true;
@@ -779,13 +785,13 @@ class HouseTemplate extends Component {
         // this.state.objs[type].rotation.y = -1
         // this.state.objs[type].rotation.x = -0.2
         if (length > 0.5) {
-          this.state.objs[type].scale.x = 0.5;
+          this.state.objs[type].scale.x = 0.65;
         }
         if (width > 0.5) {
-          this.state.objs[type].scale.x = 0.5;
+          this.state.objs[type].scale.z = 0.65;
         }
         if (height > 0.5) {
-          this.state.objs[type].scale.x = 0.5;
+          this.state.objs[type].scale.y = 0.65;
         }
         this.state.objs[type].rotateY(-1)
         // this.state.objs[type].rotateX(0.1)
@@ -863,7 +869,7 @@ class Item extends Component {
         objs: _objs,
         wallModalIsOpen: !this.props.parent.state.wallModalIsOpen
       })
-    } else {
+    } else if (selection == 'album') {
       let url
       if (event.target.files) {
         const file = event.target.files[0]
@@ -880,11 +886,13 @@ class Item extends Component {
           selectedAlbumImage: file
         });
       }
-      if (selection == 'gallery')
-        this.setState({
-          isOpen: !this.state.isOpen,
-        });
+    } else if (selection == 'gallery') {
+      console.log('here')
+      this.setState({
+        isOpen: !this.state.isOpen,
+      });
     }
+      
   };
 
   onChosenWallColor = (selection, wallPaper = 1) => async event => {
@@ -960,10 +968,10 @@ class Item extends Component {
     console.log(selection)
     if (selection == 'gallery') {
       try {
-        const res = await fetch('/bibi/photos/gallery', {
+        const res = await fetch('http://103.79.27.148:8001/photos/gallery', {
           method: 'post',
           body: this.transformRequest({
-            category: _SUPER_CATEGORIES_3D[type]
+            category: _SUPER_CATEGORIES_3D[type],
           }),
           mode: 'cors',
           headers: {
@@ -979,13 +987,13 @@ class Item extends Component {
             const cat = resJson[i]
             for (let j in cat) {
               galleryImages.push({
-                src: `/bibi/${cat[j].image}`,
+                src: `http://103.79.27.148:8001/${cat[j].image}`,
                 alt: cat[j].style,
-                mesh: `/bibi/${cat[j].model}`,
-                texture: `/bibi/${cat[j].texture}`,
-                vox: `/bibi/${cat[j].vox[0]}`,
-                ldr: `/bibi/${cat[j].ldr_with_stop[0]}`,
-                voxsobj: `/bibi/${cat[j].voxsobj[0]}`
+                mesh: `http://103.79.27.148:8001/${cat[j].model}`,
+                texture: `http://103.79.27.148:8001/${cat[j].texture}`,
+                vox: `http://103.79.27.148:8001/${cat[j].vox[2]}`,
+                ldr: `http://103.79.27.148:8001/${cat[j].ldr_with_stop[2]}`,
+                voxsobj: `http://103.79.27.148:8001/${cat[j].voxsobj[2]}`
               })
             }
           }
@@ -1075,12 +1083,13 @@ class Item extends Component {
     console.log(imageData)
     formdata.append('file', imageData);
     formdata.append('category', _SUPER_CATEGORIES_3D[type]);
+    formdata.append('resolution', 32);
 
     try {
       if (type != 'human') {
 
         const res = await axios.post(
-          '/bibi/photos/basic-upload/',
+          'http://103.79.27.148:8001/photos/basic-upload/',
           formdata,
           {
             headers: {
@@ -1089,11 +1098,11 @@ class Item extends Component {
           })
         const { url_mesh, url_texture, url_vox, url_ldr_with_stop, url_voxsobj } = res.data
         this.props.parent.getChildrenMsg(type, {
-          mesh: `/bibi/${url_mesh}`,
-          texture: `/bibi/${url_texture}`,
-          vox: `/bibi/${url_vox}`,
-          ldr: `/bibi/${url_ldr_with_stop}`,
-          voxsobj: `/bibi/${url_voxsobj}`
+          mesh: `http://103.79.27.148:8001/${url_mesh}`,
+          texture: `http://103.79.27.148:8001/${url_texture}`,
+          vox: `http://103.79.27.148:8001/${url_vox}`,
+          ldr: `http://103.79.27.148:8001/${url_ldr_with_stop}`,
+          voxsobj: `http://103.79.27.148:8001/${url_voxsobj}`
         })
         this.setState({
           isOpen: false,
@@ -1101,7 +1110,7 @@ class Item extends Component {
 
       } else {
         const res = await axios.post(
-          '/bibi/photos/reconstruction-upload/',
+          'http://103.79.27.148:8001/photos/reconstruction-upload/',
           formdata,
           {
             headers: {
@@ -1110,11 +1119,11 @@ class Item extends Component {
           })
         const { url_mesh, url_texture, url_vox, url_ldr_with_stop, url_voxsobj } = res.data
         this.props.parent.getChildrenMsg(type, {
-          mesh: `/bibi/${url_mesh}`,
-          texture: `/bibi/${url_texture}`,
-          vox: `/bibi/${url_vox}`,
-          ldr: `/bibi/${url_ldr_with_stop}`,
-          voxsobj: `/bibi/${url_voxsobj}`
+          mesh: `http://103.79.27.148:8001/${url_mesh}`,
+          texture: `http://103.79.27.148:8001/${url_texture}`,
+          vox: `http://103.79.27.148:8001/${url_vox}`,
+          ldr: `http://103.79.27.148:8001/${url_ldr_with_stop}`,
+          voxsobj: `http://103.79.27.148:8001/${url_voxsobj}`
         })
         this.setState({
           isOpen: false

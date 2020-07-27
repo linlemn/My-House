@@ -65,6 +65,7 @@
     "resolve-url-loader": "3.1.1",
     "sass-loader": "8.0.2",
     "semver": "6.3.0",
+    "serve": "^11.3.2",
     "stats-js": "^1.0.1",
     "style-loader": "0.23.1",
     "styled-components": "^5.1.1",
