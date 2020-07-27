@@ -297,6 +297,7 @@ class HouseTemplate extends Component {
   }
 
   toggleModal = (id, event) => {
+    // console.log(id, this.state.modalIsOpen)
     // event.preventDefault();
     event.stopPropagation();
     if (id == 'wall') {
@@ -320,7 +321,7 @@ class HouseTemplate extends Component {
     else {
       this.setState({
         modalIsOpen: !this.state.modalIsOpen,
-        loading: true,
+        loading: this.state.modalIsOpen ? true : false,
         clickType: id
       });
     }
@@ -489,20 +490,24 @@ class HouseTemplate extends Component {
   }
 
   toInstruction = event => {
-    event.stopPropagation()
-    const {iconDisplayState, buildingObjectUrls, clickFurnitureType} = this.state
-    // 跳转前记录
-    let iconDisplayStateRecord = ''
-    for (let t in buildingObjectUrls) {
-      if (buildingObjectUrls[t]) {
-        window.sessionStorage.setItem(t, `mesh:${buildingObjectUrls[t].mesh}?texture:${buildingObjectUrls[t].texture}?ldr:${buildingObjectUrls[t].ldr}?vox:${buildingObjectUrls[t].obj}`)
-        iconDisplayStateRecord += `${t}:${iconDisplayState[t]}?`
-      }
-    }
-    window.sessionStorage.setItem('iconDisplayState', iconDisplayStateRecord)
-      // type是字符串
-      const ldr = this.state.buildingObjectUrls[clickFurnitureType].ldr.split('/').pop()
-      window.location.href = (`http://103.79.27.148:8081/buildinginstructions/sample_instructions.htm?model=${ldr}`)
+    this.setState({
+      instOrPre: 'inst',
+      isPreviewOpen: true
+    })
+    // event.stopPropagation()
+    // const {iconDisplayState, buildingObjectUrls, clickFurnitureType} = this.state
+    // // 跳转前记录
+    // let iconDisplayStateRecord = ''
+    // for (let t in buildingObjectUrls) {
+    //   if (buildingObjectUrls[t]) {
+    //     window.sessionStorage.setItem(t, `mesh:${buildingObjectUrls[t].mesh}?texture:${buildingObjectUrls[t].texture}?ldr:${buildingObjectUrls[t].ldr}?vox:${buildingObjectUrls[t].obj}`)
+    //     iconDisplayStateRecord += `${t}:${iconDisplayState[t]}?`
+    //   }
+    // }
+    // window.sessionStorage.setItem('iconDisplayState', iconDisplayStateRecord)
+    //   // type是字符串
+    //   const ldr = this.state.buildingObjectUrls[clickFurnitureType].ldr.split('/').pop()
+    //   window.location.href = (`http://103.79.27.148:8081/buildinginstructions/sample_instructions.htm?model=${ldr}`)
   }
 
   onReselectionClick = event => {
@@ -517,13 +522,27 @@ class HouseTemplate extends Component {
   onPreviewClick = event => {
     event.stopPropagation()
     this.setState({
-      isPreviewOpen: true
+      isPreviewOpen: true,
+      instOrPre: 'pre'
     })
   }
 
   getLdrName = () =>{ 
     const {buildingObjectUrls, clickFurnitureType} = this.state
     return buildingObjectUrls[clickFurnitureType] ? buildingObjectUrls[clickFurnitureType].ldr.split('/').pop() : ''
+  }
+
+  getInstOrPre = () => {
+    if (this.state.instOrPre == 'pre')
+      return `http://103.79.27.148:8081/buildinginstructions/sample_view.htm?model=${this.getLdrName()}`
+    else if (this.state.instOrPre == 'inst') {
+      const {buildingObjectUrls, clickFurnitureType} = this.state
+      const ldr = buildingObjectUrls[clickFurnitureType].ldr.split('/').pop()
+      return `http://103.79.27.148:8081/buildinginstructions/sample_instructions.htm?model=${ldr}`
+    } else {
+      return ''
+    }
+      
   }
 
   render() {
@@ -672,7 +691,7 @@ class HouseTemplate extends Component {
           }}
         >
           {/* <div className="canvas-preview" ref={(previewMount) => { this.previewMount = previewMount }}></div> */}
-          <iframe className="canvas-preview" src={`http://103.79.27.148:8081/buildinginstructions/sample_view.htm?model=${this.getLdrName()}`}></iframe>
+          <iframe className="canvas-preview" src={this.getInstOrPre()}></iframe>
         </Modal>
       </div>
     );
@@ -855,8 +874,8 @@ class Item extends Component {
   }
 
   toggleModal = (selection, wallPaper = 1) => async event => {
-    event.preventDefault();
     event.stopPropagation();
+    console.log('out', selection)
     if (selection === 'wall') {
       console.log(selection)
       const _objs = this.props.parent.state.objs
@@ -1209,8 +1228,8 @@ class Item extends Component {
 
   render() {
     const { isOpen } = this.state;
-    const { selection, index } = this.props;
-    const toggleModal = this.toggleModal(index);
+    const { selection } = this.props;
+    const toggleModal = this.toggleModal(selection);
     return (
       <div className={selection == 'wall' ? "wall-selection-wrapper" : "selection-wrapper"}>
         {
