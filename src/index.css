@@ -57,6 +57,19 @@ code {
   .forced-landscape{
      position : absolute ;
   }
+  .vertical{
+    position : absolute ;
+    top : 0 ; 
+    left : 0 ;
+    width : 100% ;
+    height : 100% ;
+    font-size: 1.4rem;
+    font-weight: 100;
+    color: #F7A207;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    text-align: center;
+    margin-top: 10px;
+ }
 } 
 
 @media screen and (orientation: landscape) {
@@ -66,5 +79,9 @@ code {
        left : 0 ;
        width : 100% ;
        height : 100% ;
+    }
+    .vertical {
+     position : absolute ;
+     opacity: 0;
     }
 }

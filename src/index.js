@@ -14,7 +14,6 @@ import { TransitionGroup, CSSTransition } from 'react-transition-group'
 
 ReactDOM.render(
   <UserAgentProvider ua={window.navigator.userAgent}>
-    <UserAgent mobile>
     <div className="forced-landscape">
     <Router>
       <TransitionGroup>
@@ -44,7 +43,7 @@ ReactDOM.render(
           </Switch></CSSTransition>
       </TransitionGroup></Router>
   </div>
-    </UserAgent>
+    <div className="vertical">请横屏使用哦~</div>
   </UserAgentProvider>
   // <React.StrictMode>
   //  </React.StrictMode>
