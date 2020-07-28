@@ -616,7 +616,7 @@ class HouseTemplate extends Component {
               border: 'None',
               boxShadow: '5px 5px 10px rgba(0,0,0,0.25)',
               borderRadius: '10%',
-              padding: '35px',
+              padding: '50px',
             }
           }}
         >
@@ -938,7 +938,7 @@ class Item extends Component {
       //   <input type="file" accept="image/*" capture="camera" />  
       // </div>
       case 'gallery':
-        return <div className="selection" key={selection} onTouchStart={toggleModal}>
+        return <div className="selection" key={selection} onClick={toggleModal}>
           <img src={gallery} />
         </div>
       case 'album':

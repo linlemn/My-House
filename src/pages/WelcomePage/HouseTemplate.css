@@ -13,30 +13,30 @@
 }
 
 .sofa {
-    bottom: 110px;
-    left: 360px;
+    bottom: 30vh;
+    left: 50vw;
 }
 
 .table {
-    bottom: 50px;
-    left: 430px;
+    bottom: 20vh;
+    left: 40vw;
 }
 
 .chair {
-    bottom: 70px;
-    right: 150px;
+    bottom: 18vh;
+    right: 20vw;
 }
 
 .human {
-    bottom: 70px;
-    left: 200px;
+    bottom: 15vh;
+    left: 25vw;
     width: 30px;
     height: 42px
 }
 
 .bookshelf {
-    top: 140px;
-    left: 100px;
+    top: 50vh;
+    left: 10vw;
 }
 
 .wall-selection-wrapper {
@@ -81,27 +81,25 @@
     align-items: center;
     height: 100%;
     width: 100%;
+    padding: 10px;
 }
 
 .selection-wrapper .selection {
     position: relative;
-    margin: 10px;
-    border-radius: 25px;
-    width: 68%;
-    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .selection-wrapper .human-album {
     position: relative;
     margin: 10px;
     border-radius: 40px;
-    width: 70%;
-    height: 35%;
 }
 
 .selection-wrapper img {
     width: 100%;
-    position: absolute;
     top: 0;
     left: 0;
 }
@@ -164,6 +162,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    height: 100%;
 }
 
 .album-image {
