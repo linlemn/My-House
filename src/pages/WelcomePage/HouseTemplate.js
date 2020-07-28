@@ -586,9 +586,9 @@ class HouseTemplate extends Component {
                 }
               </div>
             </Modal></div>
-          <img src={meshHouse} className={meshOrVox == 'mesh' ? 'house-selected' : 'house-unselected'} onClick={e => {
+          {/* <img src={meshHouse} className={meshOrVox == 'mesh' ? 'house-selected' : 'house-unselected'} onClick={e => {
             this.onHouseTypeIconClick('mesh')
-          }}></img>
+          }}></img> */}
           {/* <img src={voxHouse} className={meshOrVox == 'vox' ? 'house-selected' : 'house-unselected'} onClick={e => {
             this.onHouseTypeIconClick('vox')
           }}></img> */}
