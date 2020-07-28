@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import { Link, BrowserRouter as Router, Switch, Route, Redirect, withRouter } from 'react-router-dom';
 import { Carousel } from 'antd';
+import Slider from "react-slick";
 
 import './SelectRoom.css'
 import 'antd/dist/antd.css';
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
 
 const DEFAULT_TITLE = 'Default title';
 
@@ -31,16 +34,24 @@ class SelectRoom extends Component {
       return (
         <Router>
             <div className='container'>
-                <Carousel onChange={this.onChange}>
-                        <div onClick={this.clickStart}>
-                            <img src={`${process.env.PUBLIC_URL}/images/livingRoom.png`} className='carouselImg'></img>
-                            <h3>客厅</h3>
+                <Slider 
+                  onChange={this.onChange} 
+                  dotPosition='top'
+                  draggable={true}
+                  swipeToSlide={true}
+                  swipe={true}
+                  dots={true}
+                  slidesToShow={1}
+                  slidesToScroll={1}>
+                        <div>
+                            <img src={`${process.env.PUBLIC_URL}/images/livingRoom.png`} className='carouselImg' onClick={this.clickStart}></img>
+                            <h3 className='carousel-h3'>客厅</h3>
                         </div>
                         <div>
-                            <img src={`${process.env.PUBLIC_URL}/images/lockedBedroom.png`} className='carouselImg'></img>
-                            <h3>卧室</h3>
+                            <img src={`${process.env.PUBLIC_URL}/images/lockedBedroom.png`} className='carouselImg' onClick={this.clickStart}></img>
+                            <h3 className='carousel-h3'>卧室</h3>
                         </div>
-                    </Carousel>
+                    </Slider>
             </div>
         </Router>
         
