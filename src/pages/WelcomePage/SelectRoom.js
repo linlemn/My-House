@@ -48,7 +48,7 @@ class SelectRoom extends Component {
                             <h3 className='carousel-h3'>客厅</h3>
                         </div>
                         <div>
-                            <img src={`${process.env.PUBLIC_URL}/images/lockedBedroom.png`} className='carouselImg' onClick={this.clickStart}></img>
+                            <img src={`${process.env.PUBLIC_URL}/images/lockedBedroom.png`} className='carouselImg'></img>
                             <h3 className='carousel-h3'>卧室</h3>
                         </div>
                     </Slider>
