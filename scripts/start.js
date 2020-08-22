@@ -117,7 +117,7 @@ checkBrowsers(paths.appPath, isInteractive)
       urls.lanUrlForConfig
     );
     const devServer = new WebpackDevServer(compiler, serverConfig);
-    require('../src/setupProxy')(devServer)
+    // require('../src/setupProxy')(devServer)
     // Launch WebpackDevServer.
     devServer.listen(port, HOST, err => {
       if (err) {
