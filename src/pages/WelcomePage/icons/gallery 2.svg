@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="332px" height="108px" viewBox="0 0 332 108" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50 (54983) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 9</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <filter x="-9.9%" y="-11.5%" width="128.3%" height="132.3%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="3" dy="3" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="iPad" transform="translate(-510.000000, -605.000000)">
+            <g id="Group-9" transform="translate(510.000000, 605.000000)">
+                <rect id="Rectangle" fill="#6EA2CB" x="0" y="0" width="332" height="108" rx="54"></rect>
+                <g id="browse" filter="url(#filter-1)" transform="translate(15.715976, 22.000000)" fill-rule="nonzero">
+                    <path d="M69.739645,32.5008681 C69.739645,50.4517775 55.4466462,65 37.816568,65 C20.1847847,65 5.89349112,50.4517775 5.89349112,32.5008681 C5.89349112,14.5516947 20.1864899,8.13780345e-08 37.8148628,0 C55.4466462,0 69.739645,14.5516947 69.739645,32.5008681" id="Shape" fill="#4B71AD"></path>
+                    <path d="M74.7226207,17.6199665 C72.9012275,14.6625135 68.7739917,13.2562901 63.3954041,13 C64.5796265,14.5589278 65.6140381,16.2229912 66.4852674,17.9706793 C68.2107978,18.2961003 69.3012371,18.8137389 69.6607226,19.4342308 C71.1825445,22.0561461 62.3683027,31.6619671 40.5372623,39.4889323 C18.7045101,47.3158976 5.68428795,45.5370419 5.1399242,42.5644137 C5.01153653,41.861302 5.5079689,40.7754413 6.61723841,39.4332904 C6.14412457,37.5431953 5.85070492,35.6138166 5.74077852,33.6701351 C1.78643811,37.2699996 -0.456066646,40.9609144 0.0780260843,44.378678 C1.58444145,54.0013602 22.6297492,52.1769793 42.5829059,45.0244617 C62.5360625,37.8719441 79.8495686,25.944337 74.7226207,17.6199665" id="Shape" fill="#739AE7"></path>
+                </g>
+                <text id="Gallery" font-family="PingFangSC-Semibold, PingFang SC" font-size="48" font-weight="500" fill="#FFFFFF">
+                    <tspan x="119" y="67">Gallery</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>

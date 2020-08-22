@@ -9,33 +9,41 @@
 .ant-carousel .slick-slide {
     overflow: hidden;
     text-align: center;
-    /* height: 100%; */
-    line-height: 375px;
+    height: 500px;
+    /* line-height: 500px; */
     width: 200px;
     background: #FBD460;
     overflow: hidden;
     display: flex;
     justify-content: flex-start;
     align-items: center;
+    z-index: 100;
   }
   
-  .ant-carousel .slick-slide h3 {
+  .carousel-h3 {
     color: #fff;
     position: relative;
-    top: -100px;
+    top: 10px;
+    /* left: 48%; */
+    text-align: center;
     font-size: 1.8rem;
   }
 
   .carouselImg {
       position: relative;
-      top: 50px;
+      top: 20px;
       left: 37.5%;
+      right: 37.5%;
       width: 25%;
       height: 25%;
   }
 
-  .slick-dots {
+  .slick-dots li.slick-active button:before {
+      color: white;
+  }
+
+  /* .slick-dots {
       position: absolute;
       top: 340px;
       overflow: hidden;
-  }
+  } */
