@@ -150,9 +150,18 @@
 
 .reselect-style-text {
     font-size: 1.4rem;
-    font-weight: 100;
+    font-weight: bold;
     color: #F7A207;
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .huamn-style-text {
+    font-size: 1.0rem;
+    font-weight: bold;
+    color: #F7A207;
+    /* font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; */
     text-align: center;
     margin-top: 10px;
   }

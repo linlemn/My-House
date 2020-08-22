@@ -35,12 +35,12 @@ module.exports = function(proxy, allowedHost) {
     // specified the `proxy` setting. Finally, we let you override it if you
     // really know what you're doing with a special environment variable.
     disableHostCheck:
-      !proxy || process.env.DANGEROUSLY_DISABLE_HOST_CHECK === 'true',
+      !proxy || process.env.DANGEROUSLY_DISABLE_HOST_CHECK === "true",
     // Enable gzip compression of generated files.
     compress: true,
     // Silence WebpackDevServer's own logs since they're generally not useful.
     // It will still show compile warnings and errors with this setting.
-    clientLogLevel: 'none',
+    clientLogLevel: "none",
     // By default WebpackDevServer serves physical files from current directory
     // in addition to all the virtual build products that it serves from memory.
     // This is confusing because those files won’t automatically be available in
@@ -67,7 +67,7 @@ module.exports = function(proxy, allowedHost) {
     hot: true,
     // Use 'ws' instead of 'sockjs-node' on server since we're using native
     // websockets in `webpackHotDevClient`.
-    transportMode: 'ws',
+    transportMode: "ws",
     // Prevent a WS client from getting injected as we're already including
     // `webpackHotDevClient`.
     injectClient: false,
@@ -103,12 +103,13 @@ module.exports = function(proxy, allowedHost) {
     },
     public: allowedHost,
     // `proxy` is run between `before` and `after` `webpack-dev-server` hooks
-    proxy: {'/bibi': {
-      target: 'http://103.79.27.148:8001',
-　　　　　　　　 pathRewrite:{'^/bibi' : ''},
-      changeOrigin: true
-  }
-},
+    proxy: {
+      "/bibi": {
+        target: "http://103.79.27.148:15345",
+        pathRewrite: { "^/bibi": "" },
+        changeOrigin: true,
+      },
+    },
     before(app, server) {
       // Keep `evalSourceMapMiddleware` and `errorOverlayMiddleware`
       // middlewares before `redirectServedPath` otherwise will not have any effect
